@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useState, Suspense } from 'react';
-import { User, Mail, Lock, Building2, ArrowRight } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { User, Mail, Lock, Building2, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 function SignupContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const type = searchParams.get('type') || 'buyer';
   
   const [formData, setFormData] = useState({
@@ -19,11 +20,79 @@ function SignupContent() {
   });
 
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Signup attempt:', formData);
+  const validateForm = () => {
+    if (!formData.fullName.trim()) {
+      setError('Full name is required');
+      return false;
+    }
+    if (!formData.email.includes('@')) {
+      setError('Please enter a valid email');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    if (!formData.companyName.trim()) {
+      setError('Company name is required');
+      return false;
+    }
+    if (!agreeTerms) {
+      setError('You must agree to the terms and conditions');
+      return false;
+    }
+    return true;
   };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(true);
+      
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        const dashboardRoute = formData.accountType === 'buyer' 
+          ? '/dashboard/procurement' 
+          : '/dashboard/contractor';
+        router.push(dashboardRoute);
+      }, 2000);
+    }, 1500);
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+        <div className="w-full max-w-lg">
+          <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h2>
+            <p className="text-gray-600 mb-6">Welcome {formData.fullName}! Setting up your dashboard...</p>
+            <div className="animate-spin inline-block">
+              <div className="border-4 border-gray-200 border-t-blue-600 rounded-full w-8 h-8"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
@@ -39,6 +108,14 @@ function SignupContent() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Get Started Today</h1>
           <p className="text-gray-600">Join thousands of businesses connecting on Supplier Diversity and Inclusion</p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Signup Form */}
         <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
@@ -108,7 +185,7 @@ function SignupContent() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  placeholder="you@example.com"
+                  placeholder="your@email.com"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   required
                 />
@@ -124,7 +201,7 @@ function SignupContent() {
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  placeholder="••••••••"
+                  placeholder="At least 6 characters"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   required
                 />
@@ -140,7 +217,7 @@ function SignupContent() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                  placeholder="••••••••"
+                  placeholder="Confirm your password"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   required
                 />
@@ -171,10 +248,20 @@ function SignupContent() {
             {/* Signup Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
-              Create Account
-              <ArrowRight size={18} />
+              {loading ? (
+                <>
+                  <div className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Create Account
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
           </form>
 
@@ -190,10 +277,10 @@ function SignupContent() {
 
           {/* Social Signup */}
           <div className="grid grid-cols-2 gap-4">
-            <button className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 transition font-semibold">
+            <button type="button" className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 transition font-semibold">
               Google
             </button>
-            <button className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 transition font-semibold">
+            <button type="button" className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 transition font-semibold">
               LinkedIn
             </button>
           </div>
