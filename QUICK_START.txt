@@ -1,0 +1,96 @@
+📱 ContractConnect - Mobile App Platform
+═══════════════════════════════════════════════════════════════
+
+COMPLETED UPDATES:
+✅ NACE → NACIS (updated throughout all pages)
+✅ Mobile-first responsive design 
+✅ Hamburger navigation menu for mobile
+✅ Optimized layouts for all screen sizes
+✅ Touch-friendly buttons and spacing
+✅ App-like messaging interface
+✅ PWA manifest for installation
+
+═══════════════════════════════════════════════════════════════
+
+HOW TO START THE PLATFORM:
+
+Option 1 - Easiest:
+   Double-click: start.bat
+   (in the supplier-diversity folder)
+
+Option 2 - Manual:
+   1. Open Command Prompt
+   2. Type: cd C:\Users\CSS\OneDrive\Desktop\CSS\supplier-diversity
+   3. Type: npm run dev
+   4. Visit: http://localhost:3001
+
+═══════════════════════════════════════════════════════════════
+
+ACCESS ON YOUR PHONE:
+
+1. Make sure phone and computer are on same WiFi network
+2. Open Command Prompt and type: ipconfig
+3. Look for "IPv4 Address" (e.g., 192.168.1.100)
+4. On your phone's browser, visit: http://[YOUR_IP]:3001
+
+Example: http://192.168.1.100:3001
+
+═══════════════════════════════════════════════════════════════
+
+FEATURES (All Mobile Optimized):
+
+🏠 Homepage
+   - Hero section with features
+   - Dual signup paths (Contractor/Procurement)
+
+👷 Contractor Directory
+   - Search by NACIS code, location, rating
+   - View contractor profiles
+   - Service areas & past performance
+
+📋 Opportunities
+   - Browse contract opportunities
+   - Post new opportunities
+   - NACIS code matching
+
+💬 Messages
+   - Direct messaging between parties
+   - Conversation list (collapsible on mobile)
+   - Real-time chat interface
+
+📅 Events
+   - Training & networking events
+
+🔐 Auth
+   - Role-based login & signup
+
+═══════════════════════════════════════════════════════════════
+
+MOBILE DESIGN:
+
+✓ Hamburger menu on small screens
+✓ Touch-friendly buttons (large tap targets)
+✓ Readable font sizes
+✓ Single column layout on mobile
+✓ Multi-column layout on desktop/tablet
+✓ Responsive navigation
+✓ Optimized spacing & padding
+✓ Works in portrait & landscape
+✓ Fast loading on mobile networks
+
+═══════════════════════════════════════════════════════════════
+
+If localhost:3001 doesn't work:
+
+1. Try: http://127.0.0.1:3001
+2. Check if npm run dev finished starting (wait 15 seconds)
+3. Make sure Windows Firewall isn't blocking Node.js
+4. Try restarting with start.bat
+
+═══════════════════════════════════════════════════════════════
+
+For detailed help, see:
+- STARTUP_GUIDE.md (browser access guide)
+- README.md (full documentation)
+
+Ready to show your client! 🚀
