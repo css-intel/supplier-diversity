@@ -8,7 +8,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 function SignupContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const type = searchParams.get('type') || 'buyer';
+  const type = searchParams.get('type') === 'contractor' ? 'contractor' : 'procurement';
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -62,19 +62,27 @@ function SignupContent() {
 
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       setLoading(false);
       setSuccess(true);
       
       // Redirect after 2 seconds
-      setTimeout(() => {
-        const dashboardRoute = formData.accountType === 'buyer' 
+      const redirectTimer = setTimeout(() => {
+        const dashboardRoute = formData.accountType === 'procurement' 
           ? '/dashboard/procurement' 
           : '/dashboard/contractor';
         router.push(dashboardRoute);
       }, 2000);
-    }, 1500);
+      
+      return () => clearTimeout(redirectTimer);
+    } catch (err) {
+      setLoading(false);
+      setError('An error occurred. Please try again.');
+      console.error('Signup error:', err);
+    }
   };
 
   if (success) {
@@ -125,8 +133,8 @@ function SignupContent() {
               <label className="block text-sm font-semibold text-gray-900 mb-3">I am a...</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: 'buyer', label: 'Buyer/Procurement' },
-                  { value: 'supplier', label: 'Supplier' }
+                  { value: 'procurement', label: 'Buyer/Procurement' },
+                  { value: 'contractor', label: 'Supplier/Contractor' }
                 ].map((option) => (
                   <button
                     key={option.value}
