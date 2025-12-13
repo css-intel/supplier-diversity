@@ -9,7 +9,7 @@ interface Opportunity {
   id: string;
   title: string;
   agency: string;
-  nacisCode: string;
+  nacisCodes: string[];
   budget?: { min: number; max: number };
   estimatedBudget?: { min: number; max: number };
   location: string;
@@ -23,6 +23,7 @@ export default function ContractorDashboard() {
   const [activeTab, setActiveTab] = useState<'opportunities' | 'profile' | 'alerts' | 'messages'>('opportunities');
   const [searchQuery, setSearchQuery] = useState('');
   const [nacisFilter, setNacisFilter] = useState('');
+  const [userName, setUserName] = useState('Sarah Johnson');
 
   const handleLogout = () => {
     // Clear any auth data
@@ -37,7 +38,7 @@ export default function ContractorDashboard() {
       id: '1',
       title: 'IT Infrastructure Modernization',
       agency: 'Department of Transportation',
-      nacisCode: '61110',
+      nacisCodes: ['61110', '54140'],
       budget: { min: 250000, max: 500000 },
       estimatedBudget: { min: 250000, max: 500000 },
       location: 'Washington, DC',
@@ -48,7 +49,7 @@ export default function ContractorDashboard() {
       id: '2',
       title: 'Building Maintenance Services',
       agency: 'GSA',
-      nacisCode: '56210',
+      nacisCodes: ['56210', '56201'],
       budget: { min: 100000, max: 300000 },
       estimatedBudget: { min: 100000, max: 300000 },
       location: 'New York, NY',
@@ -59,7 +60,7 @@ export default function ContractorDashboard() {
       id: '3',
       title: 'Construction Partner Needed',
       agency: 'Local Construction Firm',
-      nacisCode: '23600',
+      nacisCodes: ['23600', '23620'],
       estimatedBudget: { min: 150000, max: 400000 },
       location: 'Chicago, IL',
       submissionDeadline: '2025-02-01',
@@ -70,7 +71,7 @@ export default function ContractorDashboard() {
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          opp.agency.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesNacis = nacisFilter ? opp.nacisCode.includes(nacisFilter) : true;
+    const matchesNacis = nacisFilter ? opp.nacisCodes.some(code => code.includes(nacisFilter)) : true;
     return matchesSearch && matchesNacis;
   });
 
@@ -103,7 +104,7 @@ export default function ContractorDashboard() {
       <div className="max-w-7xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome, Contractor</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome, {userName}</h1>
           <p className="text-gray-600">Manage your profile, find opportunities, and grow your business</p>
         </div>
 
@@ -156,8 +157,14 @@ export default function ContractorDashboard() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
                       <div>
-                        <span className="text-gray-600">NACIS Code: </span>
-                        <span className="font-semibold">{opp.nacisCode}</span>
+                        <span className="text-gray-600">NACIS Codes: </span>
+                        <div className="flex gap-2 flex-wrap mt-1">
+                          {opp.nacisCodes.map((code, idx) => (
+                            <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                              {code}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-600">Location: </span>

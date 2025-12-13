@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 interface OpportunityPosted {
   id: string;
   title: string;
-  nacisCode: string;
+  nacisCodes: string[];
   location: string;
   status: 'open' | 'closed';
   submissionDeadline: string;
@@ -18,8 +18,9 @@ interface OpportunityPosted {
 export default function ProcurementDashboard() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'opportunities' | 'post' | 'contractors' | 'messages'>('opportunities');
+  const [activeTab, setActiveTab] = useState<'opportunities' | 'post' | 'profile' | 'contractors' | 'messages'>('opportunities');
   const [showPostForm, setShowPostForm] = useState(false);
+  const [userName, setUserName] = useState('John Smith');
 
   const handleLogout = () => {
     // Clear any auth data
@@ -33,7 +34,7 @@ export default function ProcurementDashboard() {
     {
       id: '1',
       title: 'IT Infrastructure Modernization',
-      nacisCode: '61110',
+      nacisCodes: ['61110', '54140'],
       location: 'Washington, DC',
       status: 'open',
       submissionDeadline: '2025-01-15',
@@ -42,7 +43,7 @@ export default function ProcurementDashboard() {
     {
       id: '2',
       title: 'Building Maintenance Services',
-      nacisCode: '56210',
+      nacisCodes: ['56210', '56201'],
       location: 'New York, NY',
       status: 'open',
       submissionDeadline: '2025-01-20',
@@ -65,6 +66,7 @@ export default function ProcurementDashboard() {
           
           <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
             <button onClick={() => { setActiveTab('opportunities'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">My Opportunities</button>
+            <button onClick={() => { setActiveTab('profile'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">My Profile</button>
             <button onClick={() => { setActiveTab('contractors'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">Find Contractors</button>
             <button onClick={() => { setActiveTab('messages'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</button>
             <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
@@ -78,7 +80,7 @@ export default function ProcurementDashboard() {
       <div className="max-w-7xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome, Procurement Officer</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome, {userName}</h1>
           <p className="text-gray-600">Post opportunities, find contractors, and manage your procurement needs</p>
         </div>
 
@@ -100,27 +102,22 @@ export default function ProcurementDashboard() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">NACIS Code (5-digit)</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., 61110" />
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">NACIS Codes (comma-separated, 5-digit)</label>
+                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., 61110, 54140, 23600" required />
+                  <p className="text-xs text-gray-600 mt-1">Enter multiple NACIS codes that contractors can respond to</p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Opportunity Type</label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                     <option>Procurement</option>
                     <option>Teaming Opportunity</option>
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Location (City, State)</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., Washington, DC" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Service Area(s)</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Geographic reach" />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Location (City, State)</label>
+                <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., Washington, DC" required />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -136,12 +133,12 @@ export default function ProcurementDashboard() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Submission Deadline</label>
-                <input type="date" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                <input type="date" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Opportunity Description</label>
-                <textarea className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" rows={6} placeholder="Describe the opportunity, requirements, and what you're looking for..." />
+                <textarea className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" rows={6} placeholder="Describe the opportunity, requirements, and what you're looking for..." required />
               </div>
 
               <div className="flex gap-3">
@@ -175,10 +172,15 @@ export default function ProcurementDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <h3 className="text-lg font-bold text-gray-900">{opp.title}</h3>
-                          <div className="flex gap-4 mt-2 text-sm text-gray-600">
-                            <span>NACIS: {opp.nacisCode}</span>
-                            <span>•</span>
-                            <span>{opp.location}</span>
+                          <div className="flex flex-col gap-2 mt-2">
+                            <div className="flex gap-2 flex-wrap">
+                              {opp.nacisCodes.map((code, idx) => (
+                                <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                                  {code}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="text-sm text-gray-600">{opp.location}</div>
                           </div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${opp.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
@@ -258,6 +260,45 @@ export default function ProcurementDashboard() {
               <MessageSquare size={48} className="text-gray-300 mx-auto mb-4" />
               <p className="text-gray-600">No messages yet. Start communicating with contractors!</p>
             </div>
+          </div>
+        )}
+
+        {/* Profile Tab */}
+        {activeTab === 'profile' && !showPostForm && (
+          <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
+            <h2 className="text-2xl font-bold mb-6">My Profile</h2>
+            <form className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
+                  <input type="text" defaultValue={userName} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
+                  <input type="email" defaultValue="john.smith@agency.gov" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Agency/Organization</label>
+                  <input type="text" defaultValue="Department of Transportation" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Phone</label>
+                  <input type="tel" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Office Location (City, State)</label>
+                <input type="text" placeholder="e.g., Washington, DC" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              </div>
+
+              <button type="submit" className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                Save Profile
+              </button>
+            </form>
           </div>
         )}
       </div>
