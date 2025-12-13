@@ -89,7 +89,7 @@ export default function EventsPage() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold">SD</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">Supplier Diversity and Inclusion</span>
+              <span className="text-xl font-bold text-gray-900">FedMatch</span>
             </Link>
             <div className="flex gap-4">
               <Link href="/auth/login" className="text-gray-600 hover:text-gray-900">

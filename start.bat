@@ -1,8 +1,8 @@
 @echo off
-REM Start Supplier Diversity and Inclusion Platform
+REM Start FedMatch Platform
 cd /d "C:\Users\CSS\OneDrive\Desktop\CSS\supplier-diversity"
 
-echo Starting Supplier Diversity and Inclusion Dev Server...
+echo Starting FedMatch Dev Server...
 echo.
 echo Waiting for server to start (this may take 10-15 seconds)...
 echo.

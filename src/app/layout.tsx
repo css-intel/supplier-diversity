@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Supplier Diversity and Inclusion",
+  title: "FedMatch",
   description: "Connect contractors with opportunities on the leading government contracting platform",
 };
 

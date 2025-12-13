@@ -24,7 +24,7 @@ export default function LoginPage() {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold">SD</span>
             </div>
-            <span className="text-lg md:text-2xl font-bold text-gray-900">Supplier Diversity and Inclusion</span>
+            <span className="text-lg md:text-2xl font-bold text-gray-900">FedMatch</span>
           </Link>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600 text-sm md:text-base">Sign in to your account</p>

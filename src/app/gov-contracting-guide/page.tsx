@@ -41,7 +41,7 @@ export default function GovContractingGuidePage() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">Supplier Diversity and Inclusion</Link>
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2"
@@ -176,7 +176,7 @@ export default function GovContractingGuidePage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto pt-6 md:pt-8 border-t border-gray-700 text-center text-xs md:text-sm">
-          <p>© 2024 Supplier Diversity and Inclusion. All rights reserved.</p>
+          <p>© 2024 FedMatch. All rights reserved.</p>
         </div>
       </footer>
     </div>
