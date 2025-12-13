@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [accountType, setAccountType] = useState<'contractor' | 'procurement'>('contractor');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -44,9 +45,10 @@ export default function LoginPage() {
       setLoading(false);
       setSuccess(true);
       
-      // Redirect to dashboard after 2 seconds
+      // Redirect to appropriate dashboard after 2 seconds
       const redirectTimer = setTimeout(() => {
-        router.push('/dashboard/contractor');
+        const dashboardRoute = accountType === 'procurement' ? '/dashboard/procurement' : '/dashboard/contractor';
+        router.push(dashboardRoute);
       }, 2000);
       
       return () => clearTimeout(redirectTimer);
@@ -100,6 +102,35 @@ export default function LoginPage() {
         {/* Login Form */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200">
           <form onSubmit={handleLogin} className="space-y-6">
+            {/* Account Type Selection */}
+            <div>
+              <label className="block text-xs md:text-sm font-semibold text-gray-900 mb-3">I am a:</label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAccountType('contractor')}
+                  className={`flex-1 px-4 py-3 rounded-lg font-semibold text-sm md:text-base transition ${
+                    accountType === 'contractor'
+                      ? 'bg-blue-600 text-white border-2 border-blue-600'
+                      : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200'
+                  }`}
+                >
+                  Contractor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccountType('procurement')}
+                  className={`flex-1 px-4 py-3 rounded-lg font-semibold text-sm md:text-base transition ${
+                    accountType === 'procurement'
+                      ? 'bg-blue-600 text-white border-2 border-blue-600'
+                      : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200'
+                  }`}
+                >
+                  Procurement
+                </button>
+              </div>
+            </div>
+
             {/* Email Input */}
             <div>
               <label className="block text-xs md:text-sm font-semibold text-gray-900 mb-2">Email Address</label>
