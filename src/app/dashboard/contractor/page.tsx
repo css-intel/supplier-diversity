@@ -29,6 +29,7 @@ export default function ContractorDashboard() {
     localStorage.removeItem('userAuth');
     // Redirect to home
     router.push('/');
+  };
 
   // Mock opportunities data
   const opportunities: Opportunity[] = [

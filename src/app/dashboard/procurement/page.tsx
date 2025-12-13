@@ -26,6 +26,7 @@ export default function ProcurementDashboard() {
     localStorage.removeItem('userAuth');
     // Redirect to home
     router.push('/');
+  };
 
   // Mock posted opportunities
   const postedOpportunities: OpportunityPosted[] = [
@@ -69,9 +70,6 @@ export default function ProcurementDashboard() {
             <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
               <LogOut size={16} /> Logout
             </button>
-          </div>
-            <button onClick={() => { setShowPostForm(!showPostForm); }} className="text-white bg-blue-600 hover:bg-blue-700 font-medium px-4 py-2 rounded-lg text-left">+ Post Opportunity</button>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Logout</a>
           </div>
         </div>
       </nav>
