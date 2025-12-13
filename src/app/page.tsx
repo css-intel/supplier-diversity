@@ -50,17 +50,17 @@ export default function Home() {
           </form>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mt-8 md:mt-12">
-            <div className="bg-white bg-opacity-10 rounded-lg p-4 md:p-6">
-              <div className="text-2xl md:text-4xl font-bold">5,000+</div>
-              <p className="text-blue-100 mt-1 md:mt-2 text-sm md:text-base">Verified Contractors</p>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg">
+              <div className="text-2xl md:text-4xl font-bold text-blue-600">5,000+</div>
+              <p className="text-gray-800 font-semibold mt-1 md:mt-2 text-sm md:text-base">Verified Contractors</p>
             </div>
-            <div className="bg-white bg-opacity-10 rounded-lg p-4 md:p-6">
-              <div className="text-2xl md:text-4xl font-bold">1,200+</div>
-              <p className="text-blue-100 mt-1 md:mt-2 text-sm md:text-base">Procurement Officers</p>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg">
+              <div className="text-2xl md:text-4xl font-bold text-blue-600">1,200+</div>
+              <p className="text-gray-800 font-semibold mt-1 md:mt-2 text-sm md:text-base">Procurement Officers</p>
             </div>
-            <div className="bg-white bg-opacity-10 rounded-lg p-4 md:p-6">
-              <div className="text-2xl md:text-4xl font-bold">3,500+</div>
-              <p className="text-blue-100 mt-1 md:mt-2 text-sm md:text-base">Active Opportunities</p>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg">
+              <div className="text-2xl md:text-4xl font-bold text-blue-600">3,500+</div>
+              <p className="text-gray-800 font-semibold mt-1 md:mt-2 text-sm md:text-base">Active Opportunities</p>
             </div>
           </div>
         </div>
@@ -206,7 +206,9 @@ export default function Home() {
           <div>
             <h4 className="font-bold text-white mb-2 md:mb-4 text-sm md:text-base">Support</h4>
             <ul className="space-y-1 md:space-y-2 text-xs md:text-sm">
-              <li><a href="#" className="hover:text-white">Help Center</a></li>
+              <li><a href="/faq" className="hover:text-white">FAQ & Guides</a></li>
+              <li><a href="/gov-contracting-guide" className="hover:text-white">Gov Contracting Guide</a></li>
+              <li><a href="/blog" className="hover:text-white">Blog</a></li>
               <li><a href="#" className="hover:text-white">Contact Support</a></li>
             </ul>
           </div>
