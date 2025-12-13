@@ -161,6 +161,44 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12">Frequently Asked Questions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-5xl mx-auto">
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-md hover:shadow-lg transition">
+              <h3 className="font-bold text-blue-600 mb-2 md:mb-3 text-sm md:text-base">What are NACIS codes?</h3>
+              <p className="text-gray-600 text-sm md:text-base">NACIS codes categorize businesses by industry. Contractors add their codes to their profile, and procurement officers use them to find qualified contractors for specific work.</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-md hover:shadow-lg transition">
+              <h3 className="font-bold text-blue-600 mb-2 md:mb-3 text-sm md:text-base">How do I get alerts for matching opportunities?</h3>
+              <p className="text-gray-600 text-sm md:text-base">Add your NACIS codes to your contractor profile and enable alert preferences. You'll automatically get notifications when opportunities matching your codes are posted.</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-md hover:shadow-lg transition">
+              <h3 className="font-bold text-blue-600 mb-2 md:mb-3 text-sm md:text-base">What business certifications do you support?</h3>
+              <p className="text-gray-600 text-sm md:text-base">We support DBE, HUBZone, 8(a), MBE, WBE, and other federal certifications. Add yours to your profile to stand out to procurement officers.</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-md hover:shadow-lg transition">
+              <h3 className="font-bold text-blue-600 mb-2 md:mb-3 text-sm md:text-base">Can I team with other contractors?</h3>
+              <p className="text-gray-600 text-sm md:text-base">Yes! You can form teaming agreements with other contractors to bid on larger opportunities. Use our messaging system to coordinate with potential partners.</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-md hover:shadow-lg transition">
+              <h3 className="font-bold text-blue-600 mb-2 md:mb-3 text-sm md:text-base">How do I post opportunities?</h3>
+              <p className="text-gray-600 text-sm md:text-base">After signing up as a procurement officer, go to your dashboard. Click "Post New Opportunity" and fill in the details including NACIS codes and submission deadline.</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 md:p-6 shadow-md hover:shadow-lg transition">
+              <h3 className="font-bold text-blue-600 mb-2 md:mb-3 text-sm md:text-base">Is my information confidential?</h3>
+              <p className="text-gray-600 text-sm md:text-base">Yes, your profile and bid information are secure. We only share information with procurement officers when bidding on their opportunities or after you've established contact.</p>
+            </div>
+          </div>
+          <div className="text-center mt-8 md:mt-12">
+            <Link href="/faq" className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700">
+              View All FAQs <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-blue-600 text-white py-12 md:py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
