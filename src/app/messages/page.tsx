@@ -1,0 +1,129 @@
+'use client';
+
+import Link from 'next/link';
+import { Send, Clock, Users } from 'lucide-react';
+import { useState } from 'react';
+
+export default function MessagesPage() {
+  const [selectedConversation, setSelectedConversation] = useState(1);
+
+  const conversations = [
+    {
+      id: 1,
+      name: 'John Smith - City of Chicago',
+      lastMessage: 'Are you available for the electrical project?',
+      time: '5 min ago',
+      unread: 2,
+      messages: [
+        { id: 1, sender: 'John Smith', text: 'Hi, I saw your profile for electrical work', time: '2:15 PM' },
+        { id: 2, sender: 'You', text: 'Thank you! I\'m very interested in the Chicago project', time: '2:30 PM' },
+        { id: 3, sender: 'John Smith', text: 'Great! Are you available for the electrical project?', time: '2:45 PM' }
+      ]
+    },
+    {
+      id: 2,
+      name: 'Sarah Johnson - BuildRight Corp',
+      lastMessage: 'Thank you for your interest',
+      time: '1 hour ago',
+      unread: 0,
+      messages: [
+        { id: 1, sender: 'Sarah Johnson', text: 'We reviewed your application', time: '1:00 PM' },
+        { id: 2, sender: 'Sarah Johnson', text: 'Thank you for your interest', time: '1:05 PM' }
+      ]
+    },
+    {
+      id: 3,
+      name: 'Mike Davis - Denver County',
+      lastMessage: 'Can you send over your certifications?',
+      time: '3 hours ago',
+      unread: 0,
+      messages: [
+        { id: 1, sender: 'Mike Davis', text: 'Can you send over your certifications?', time: '11:00 AM' }
+      ]
+    }
+  ];
+
+  const current = conversations.find(c => c.id === selectedConversation);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold text-blue-600">ContractConnect</Link>
+          <div className="hidden md:flex gap-8">
+            <Link href="/contractors" className="text-gray-700 hover:text-blue-600 font-medium">Find Contractors</Link>
+            <Link href="/opportunities" className="text-gray-700 hover:text-blue-600 font-medium">Opportunities</Link>
+            <Link href="/messages" className="text-gray-700 hover:text-blue-600 font-medium">Messages</Link>
+            <Link href="/events" className="text-gray-700 hover:text-blue-600 font-medium">Events</Link>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-8">Messages</h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Conversations List */}
+          <div className="md:col-span-1 bg-white rounded-lg shadow-md">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="font-bold text-lg">Conversations</h2>
+            </div>
+            <div className="divide-y">
+              {conversations.map((conv) => (
+                <button
+                  key={conv.id}
+                  onClick={() => setSelectedConversation(conv.id)}
+                  className={`w-full text-left p-4 hover:bg-gray-50 transition ${selectedConversation === conv.id ? 'bg-blue-50 border-l-4 border-blue-600' : ''}`}
+                >
+                  <div className="flex justify-between items-start">
+                    <p className="font-semibold text-gray-900">{conv.name}</p>
+                    {conv.unread > 0 && <span className="bg-blue-600 text-white text-xs rounded-full px-2 py-1">{conv.unread}</span>}
+                  </div>
+                  <p className="text-sm text-gray-600 truncate">{conv.lastMessage}</p>
+                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-1"><Clock size={12} /> {conv.time}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chat View */}
+          <div className="md:col-span-2 bg-white rounded-lg shadow-md flex flex-col h-[600px]">
+            {current && (
+              <>
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                  <h2 className="font-bold text-lg">{current.name}</h2>
+                  <p className="text-sm text-gray-600">Status: Online</p>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {current.messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.sender === 'You' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs px-4 py-2 rounded-lg ${msg.sender === 'You' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                        <p>{msg.text}</p>
+                        <p className={`text-xs mt-1 ${msg.sender === 'You' ? 'text-blue-100' : 'text-gray-500'}`}>{msg.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Type your message..."
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                    />
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      <Send size={18} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
