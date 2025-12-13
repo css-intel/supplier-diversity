@@ -2,18 +2,76 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle login
-    console.log('Login attempt:', { email, password });
+  const validateForm = () => {
+    if (!email.includes('@')) {
+      setError('Please enter a valid email');
+      return false;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+    return true;
   };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setLoading(false);
+      setSuccess(true);
+      
+      // Redirect to dashboard after 2 seconds
+      const redirectTimer = setTimeout(() => {
+        router.push('/dashboard/contractor');
+      }, 2000);
+      
+      return () => clearTimeout(redirectTimer);
+    } catch (err) {
+      setLoading(false);
+      setError('An error occurred. Please try again.');
+      console.error('Login error:', err);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
+            <p className="text-gray-600 mb-6 text-sm md:text-base">Taking you to your dashboard...</p>
+            <div className="animate-spin inline-block">
+              <div className="border-4 border-gray-200 border-t-blue-600 rounded-full w-8 h-8"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
@@ -29,6 +87,14 @@ export default function LoginPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600 text-sm md:text-base">Sign in to your account</p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+            <p className="text-red-700 text-xs md:text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Login Form */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200">
@@ -84,10 +150,20 @@ export default function LoginPage() {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition flex items-center justify-center gap-2 text-sm md:text-base min-h-12"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition flex items-center justify-center gap-2 text-sm md:text-base min-h-12 disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
-              Sign In
-              <ArrowRight size={18} />
+              {loading ? (
+                <>
+                  <div className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
           </form>
 
@@ -103,10 +179,10 @@ export default function LoginPage() {
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <button className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 active:bg-gray-100 transition font-semibold text-sm md:text-base min-h-12">
+            <button type="button" disabled={loading} className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 active:bg-gray-100 transition font-semibold text-sm md:text-base min-h-12 disabled:opacity-50 disabled:cursor-not-allowed">
               Google
             </button>
-            <button className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 active:bg-gray-100 transition font-semibold text-sm md:text-base min-h-12">
+            <button type="button" disabled={loading} className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 active:bg-gray-100 transition font-semibold text-sm md:text-base min-h-12 disabled:opacity-50 disabled:cursor-not-allowed">
               LinkedIn
             </button>
           </div>
