@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter } from 'lucide-react';
+import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Opportunity {
   id: string;
@@ -10,16 +11,24 @@ interface Opportunity {
   agency: string;
   nacisCode: string;
   budget?: { min: number; max: number };
+  estimatedBudget?: { min: number; max: number };
   location: string;
   submissionDeadline: string;
   type: 'procurement' | 'teaming';
 }
 
 export default function ContractorDashboard() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'opportunities' | 'profile' | 'alerts' | 'messages'>('opportunities');
   const [searchQuery, setSearchQuery] = useState('');
   const [nacisFilter, setNacisFilter] = useState('');
+
+  const handleLogout = () => {
+    // Clear any auth data
+    localStorage.removeItem('userAuth');
+    // Redirect to home
+    router.push('/');
 
   // Mock opportunities data
   const opportunities: Opportunity[] = [
@@ -29,6 +38,7 @@ export default function ContractorDashboard() {
       agency: 'Department of Transportation',
       nacisCode: '61110',
       budget: { min: 250000, max: 500000 },
+      estimatedBudget: { min: 250000, max: 500000 },
       location: 'Washington, DC',
       submissionDeadline: '2025-01-15',
       type: 'procurement'
@@ -39,6 +49,7 @@ export default function ContractorDashboard() {
       agency: 'GSA',
       nacisCode: '56210',
       budget: { min: 100000, max: 300000 },
+      estimatedBudget: { min: 100000, max: 300000 },
       location: 'New York, NY',
       submissionDeadline: '2025-01-20',
       type: 'procurement'
@@ -48,6 +59,7 @@ export default function ContractorDashboard() {
       title: 'Construction Partner Needed',
       agency: 'Local Construction Firm',
       nacisCode: '23600',
+      estimatedBudget: { min: 150000, max: 400000 },
       location: 'Chicago, IL',
       submissionDeadline: '2025-02-01',
       type: 'teaming'
@@ -75,11 +87,13 @@ export default function ContractorDashboard() {
           </button>
           
           <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <button onClick={() => setActiveTab('opportunities')} className="text-gray-700 hover:text-blue-600 font-medium text-left">Opportunities</button>
-            <button onClick={() => setActiveTab('profile')} className="text-gray-700 hover:text-blue-600 font-medium text-left">My Profile</button>
-            <button onClick={() => setActiveTab('alerts')} className="text-gray-700 hover:text-blue-600 font-medium text-left">Alerts</button>
-            <button onClick={() => setActiveTab('messages')} className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</button>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Logout</a>
+            <button onClick={() => {setActiveTab('opportunities'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">Opportunities</button>
+            <button onClick={() => {setActiveTab('profile'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">My Profile</button>
+            <button onClick={() => {setActiveTab('alerts'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">Alerts</button>
+            <button onClick={() => {setActiveTab('messages'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</button>
+            <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
+              <LogOut size={16} /> Logout
+            </button>
           </div>
         </div>
       </nav>
@@ -154,6 +168,13 @@ export default function ContractorDashboard() {
                           <span className="font-semibold">${opp.budget.min.toLocaleString()} - ${opp.budget.max.toLocaleString()}</span>
                         </div>
                       )}
+                      {!opp.budget && opp.estimatedBudget && (
+                        <div>
+                          <span className="text-gray-600">Estimated Budget: </span>
+                          <span className="font-semibold text-blue-600">${opp.estimatedBudget.min.toLocaleString()} - ${opp.estimatedBudget.max.toLocaleString()}</span>
+                          <span className="text-xs text-gray-500 block">*AI Estimated</span>
+                        </div>
+                      )}
                       <div>
                         <span className="text-gray-600">Submission Deadline: </span>
                         <span className="font-semibold">{new Date(opp.submissionDeadline).toLocaleDateString()}</span>
@@ -204,6 +225,25 @@ export default function ContractorDashboard() {
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Service Areas</label>
                 <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., City, State" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Open To</label>
+                <p className="text-xs text-gray-600 mb-3">Select the types of opportunities you're interested in:</p>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input type="checkbox" className="w-4 h-4" defaultChecked />
+                    <span className="ml-2 text-gray-700">Teaming Agreements</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="w-4 h-4" />
+                    <span className="ml-2 text-gray-700">Joint Ventures (JV)</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="w-4 h-4" />
+                    <span className="ml-2 text-gray-700">Subcontracting</span>
+                  </label>
+                </div>
               </div>
 
               <div>

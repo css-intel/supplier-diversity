@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Plus, Menu, X, Filter, Briefcase, Users, MessageSquare, Trash2 } from 'lucide-react';
+import { Search, Plus, Menu, X, Filter, Briefcase, Users, MessageSquare, Trash2, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface OpportunityPosted {
   id: string;
@@ -15,9 +16,16 @@ interface OpportunityPosted {
 }
 
 export default function ProcurementDashboard() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'opportunities' | 'post' | 'contractors' | 'messages'>('opportunities');
   const [showPostForm, setShowPostForm] = useState(false);
+
+  const handleLogout = () => {
+    // Clear any auth data
+    localStorage.removeItem('userAuth');
+    // Redirect to home
+    router.push('/');
 
   // Mock posted opportunities
   const postedOpportunities: OpportunityPosted[] = [
@@ -58,6 +66,10 @@ export default function ProcurementDashboard() {
             <button onClick={() => { setActiveTab('opportunities'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">My Opportunities</button>
             <button onClick={() => { setActiveTab('contractors'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">Find Contractors</button>
             <button onClick={() => { setActiveTab('messages'); setShowPostForm(false); }} className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</button>
+            <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
             <button onClick={() => { setShowPostForm(!showPostForm); }} className="text-white bg-blue-600 hover:bg-blue-700 font-medium px-4 py-2 rounded-lg text-left">+ Post Opportunity</button>
             <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Logout</a>
           </div>
