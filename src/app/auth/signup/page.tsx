@@ -34,10 +34,10 @@ function SignupContent() {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">SD</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">SupplierDiversity</span>
+            <span className="text-2xl font-bold text-gray-900">Supplier Diversity and Inclusion</span>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Get Started Today</h1>
-          <p className="text-gray-600">Join thousands of businesses connecting on SupplierDiversity</p>
+          <p className="text-gray-600">Join thousands of businesses connecting on Supplier Diversity and Inclusion</p>
         </div>
 
         {/* Signup Form */}

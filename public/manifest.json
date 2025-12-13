@@ -1,6 +1,6 @@
 {
-  "name": "ContractConnect",
-  "short_name": "ContractConnect",
+  "name": "Supplier Diversity and Inclusion",
+  "short_name": "SDI",
   "description": "Connect contractors with procurement opportunities",
   "start_url": "/",
   "display": "standalone",
@@ -25,7 +25,7 @@
   "categories": ["business"],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230f172a' width='540' height='720'/><rect fill='%232563eb' width='540' height='100'/><text x='270' y='50' font-size='32' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>ContractConnect</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230f172a' width='540' height='720'/><rect fill='%232563eb' width='540' height='100'/><text x='270' y='50' font-size='24' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>SDI Platform</text></svg>",
       "sizes": "540x720",
       "type": "image/svg+xml",
       "form_factor": "narrow"

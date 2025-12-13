@@ -1,8 +1,8 @@
 @echo off
-REM Start ContractConnect Platform
+REM Start Supplier Diversity and Inclusion Platform
 cd /d "C:\Users\CSS\OneDrive\Desktop\CSS\supplier-diversity"
 
-echo Starting ContractConnect Dev Server...
+echo Starting Supplier Diversity and Inclusion Dev Server...
 echo.
 echo Waiting for server to start (this may take 10-15 seconds)...
 echo.

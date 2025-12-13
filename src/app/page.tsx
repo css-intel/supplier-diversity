@@ -12,7 +12,7 @@ export default function Home() {
       {/* Mobile Navigation */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">ContractConnect</Link>
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">Supplier Diversity and Inclusion</Link>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2"
@@ -165,7 +165,7 @@ export default function Home() {
       <section className="bg-blue-600 text-white py-12 md:py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-6">Ready to Get Started?</h2>
-          <p className="text-base md:text-lg mb-6 md:mb-8">Join thousands of contractors and procurement officers using ContractConnect</p>
+          <p className="text-base md:text-lg mb-6 md:mb-8">Join thousands of contractors and procurement officers using Supplier Diversity and Inclusion</p>
           <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
             <Link href="/auth/signup?type=contractor" className="px-6 md:px-8 py-2 md:py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 flex items-center justify-center gap-2 text-sm md:text-base">
               Contractor <ArrowRight size={18} />
@@ -212,7 +212,7 @@ export default function Home() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto pt-6 md:pt-8 border-t border-gray-700 text-center text-xs md:text-sm">
-          <p>© 2024 ContractConnect. All rights reserved.</p>
+          <p>© 2024 Supplier Diversity and Inclusion. All rights reserved.</p>
         </div>
       </footer>
     </div>
