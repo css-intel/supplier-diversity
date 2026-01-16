@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, ClipboardList, Sparkles } from 'lucide-react';
 
 interface Event {
   id: string;
@@ -13,24 +13,26 @@ interface Event {
   attendees: number;
   description: string;
   image?: string;
+  hasSurvey?: boolean;
 }
 
 export default function EventsPage() {
   const events: Event[] = [
     {
       id: '1',
-      title: 'Supplier Diversity Summit 2025',
-      date: '2025-12-15',
+      title: 'Supplier Diversity Summit 2026',
+      date: '2026-02-15',
       time: '9:00 AM - 5:00 PM',
-      location: 'New York, NY',
+      location: 'Columbia, SC',
       type: 'Conference',
       attendees: 500,
-      description: 'Industry-leading conference for supplier diversity professionals with keynotes, panels, and networking'
+      description: 'Industry-leading conference for supplier diversity professionals with keynotes, panels, and networking',
+      hasSurvey: true
     },
     {
       id: '2',
       title: 'Speed Networking: Connect with Fortune 500 Buyers',
-      date: '2025-12-18',
+      date: '2026-02-18',
       time: '6:00 PM - 8:00 PM',
       location: 'Virtual',
       type: 'Networking',
@@ -39,18 +41,19 @@ export default function EventsPage() {
     },
     {
       id: '3',
-      title: 'Negotiation Skills Masterclass',
-      date: '2025-12-22',
-      time: '2:00 PM - 4:00 PM',
-      location: 'Chicago, IL',
-      type: 'Workshop',
+      title: 'Government Contracting Power Hour',
+      date: '2026-02-22',
+      time: '2:00 PM - 3:00 PM',
+      location: 'Virtual',
+      type: 'Matchmaking',
       attendees: 75,
-      description: 'Interactive workshop on advanced negotiation tactics for supplier success'
+      description: 'One-on-one matchmaking sessions with government procurement officers. Powered by My Virtual Check-In.',
+      hasSurvey: true
     },
     {
       id: '4',
       title: 'Women Business Owners Roundtable',
-      date: '2026-01-08',
+      date: '2026-03-08',
       time: '10:00 AM - 12:00 PM',
       location: 'Virtual',
       type: 'Roundtable',
@@ -59,18 +62,19 @@ export default function EventsPage() {
     },
     {
       id: '5',
-      title: 'Tech Solutions for Procurement: 2025 Trends',
-      date: '2026-01-15',
+      title: 'Tech Solutions for Procurement: 2026 Trends',
+      date: '2026-03-15',
       time: '1:00 PM - 3:00 PM',
       location: 'San Francisco, CA',
       type: 'Webinar',
       attendees: 300,
-      description: 'Explore latest technology trends reshaping procurement and supplier management'
+      description: 'Explore latest technology trends reshaping procurement and supplier management',
+      hasSurvey: true
     },
     {
       id: '6',
       title: 'Manufacturing Excellence Summit',
-      date: '2026-01-22',
+      date: '2026-03-22',
       time: '9:00 AM - 4:00 PM',
       location: 'Detroit, MI',
       type: 'Conference',
@@ -107,7 +111,11 @@ export default function EventsPage() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">Events & Networking</h1>
-          <p className="text-xl text-blue-100 mb-8">Connect, learn, and grow with industry leaders</p>
+          <p className="text-xl text-blue-100 mb-4">Connect, learn, and grow with industry leaders</p>
+          <div className="flex items-center gap-2 text-blue-200 text-sm mb-8">
+            <Sparkles size={16} />
+            <span>Powered by My Virtual Check-In • Event Registration & Surveys</span>
+          </div>
           
           <div className="flex gap-4">
             <input
@@ -125,7 +133,7 @@ export default function EventsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Filter Tabs */}
         <div className="flex gap-4 mb-8 overflow-x-auto pb-4 border-b border-gray-200">
-          {['All Events', 'Conferences', 'Workshops', 'Networking', 'Webinars', 'Roundtables'].map((filter) => (
+          {['All Events', 'Conferences', 'Workshops', 'Networking', 'Webinars', 'Matchmaking', 'Roundtables'].map((filter) => (
             <button
               key={filter}
               className="px-4 py-2 whitespace-nowrap font-semibold text-gray-600 hover:text-blue-600 hover:border-b-2 hover:border-blue-600 transition"
@@ -170,6 +178,12 @@ export default function EventsPage() {
                       <Users size={16} />
                       <span>{event.attendees.toLocaleString()} attending</span>
                     </div>
+                    {event.hasSurvey && (
+                      <div className="flex items-center gap-2 text-sm text-green-600">
+                        <ClipboardList size={16} />
+                        <span>Post-event survey included</span>
+                      </div>
+                    )}
                   </div>
 
                   <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold flex items-center justify-center gap-2 group">
@@ -180,6 +194,31 @@ export default function EventsPage() {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Survey Section */}
+        <div className="mt-16 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-8">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">📊 Market Research Surveys</h2>
+              <p className="text-gray-600 mb-4">
+                Need feedback from your event attendees or conducting market research? 
+                Our survey platform integrates seamlessly with event registration.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                <li>✓ Event feedback and satisfaction surveys</li>
+                <li>✓ Community-wide market research</li>
+                <li>✓ Custom survey templates</li>
+                <li>✓ Real-time analytics dashboard</li>
+              </ul>
+            </div>
+            <div>
+              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 flex items-center gap-2">
+                <ClipboardList size={18} />
+                Create Survey
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Past Events */}

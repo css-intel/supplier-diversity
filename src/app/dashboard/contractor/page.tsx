@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter, LogOut } from 'lucide-react';
+import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter, LogOut, Star, Bookmark, Paperclip } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Opportunity {
@@ -14,7 +14,9 @@ interface Opportunity {
   estimatedBudget?: { min: number; max: number };
   location: string;
   submissionDeadline: string;
+  datePosted: string;
   type: 'procurement' | 'teaming';
+  attachments?: number;
 }
 
 export default function ContractorDashboard() {
@@ -24,6 +26,19 @@ export default function ContractorDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [nacisFilter, setNacisFilter] = useState('');
   const [userName, setUserName] = useState('Sarah Johnson');
+  const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set(['1']));
+
+  const toggleSaved = (id: string) => {
+    setSavedOpportunities(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
   const handleLogout = () => {
     // Clear any auth data
@@ -32,7 +47,7 @@ export default function ContractorDashboard() {
     router.push('/');
   };
 
-  // Mock opportunities data
+  // Mock opportunities data- remove this data once completed and approved 
   const opportunities: Opportunity[] = [
     {
       id: '1',
@@ -42,8 +57,10 @@ export default function ContractorDashboard() {
       budget: { min: 250000, max: 500000 },
       estimatedBudget: { min: 250000, max: 500000 },
       location: 'Washington, DC',
-      submissionDeadline: '2025-01-15',
-      type: 'procurement'
+      submissionDeadline: '2026-02-15',
+      datePosted: '2026-01-10',
+      type: 'procurement',
+      attachments: 3
     },
     {
       id: '2',
@@ -53,8 +70,10 @@ export default function ContractorDashboard() {
       budget: { min: 100000, max: 300000 },
       estimatedBudget: { min: 100000, max: 300000 },
       location: 'New York, NY',
-      submissionDeadline: '2025-01-20',
-      type: 'procurement'
+      submissionDeadline: '2026-02-20',
+      datePosted: '2026-01-08',
+      type: 'procurement',
+      attachments: 2
     },
     {
       id: '3',
@@ -63,8 +82,10 @@ export default function ContractorDashboard() {
       nacisCodes: ['23600', '23620'],
       estimatedBudget: { min: 150000, max: 400000 },
       location: 'Chicago, IL',
-      submissionDeadline: '2025-02-01',
-      type: 'teaming'
+      submissionDeadline: '2026-03-01',
+      datePosted: '2026-01-12',
+      type: 'teaming',
+      attachments: 1
     }
   ];
 
@@ -130,7 +151,7 @@ export default function ContractorDashboard() {
                     <Filter className="absolute left-3 top-3 text-gray-400" size={18} />
                     <input
                       type="text"
-                      placeholder="Filter by NACIS code..."
+                      placeholder="Filter by NAICS code..."
                       value={nacisFilter}
                       onChange={(e) => setNacisFilter(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -149,15 +170,25 @@ export default function ContractorDashboard() {
                       <div className="flex-1">
                         <h3 className="text-lg font-bold text-gray-900">{opp.title}</h3>
                         <p className="text-gray-600 text-sm">{opp.agency}</p>
+                        <p className="text-gray-400 text-xs mt-1">Posted: {new Date(opp.datePosted).toLocaleDateString()}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${opp.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {opp.type === 'teaming' ? 'Teaming' : 'Procurement'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => toggleSaved(opp.id)}
+                          className={`p-2 rounded-full ${savedOpportunities.has(opp.id) ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={savedOpportunities.has(opp.id) ? 'Saved' : 'Save for later'}
+                        >
+                          <Star size={18} fill={savedOpportunities.has(opp.id) ? 'currentColor' : 'none'} />
+                        </button>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${opp.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {opp.type === 'teaming' ? 'Teaming' : 'Procurement'}
+                        </span>
+                      </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
                       <div>
-                        <span className="text-gray-600">NACIS Codes: </span>
+                        <span className="text-gray-600">NAICS Codes: </span>
                         <div className="flex gap-2 flex-wrap mt-1">
                           {opp.nacisCodes.map((code, idx) => (
                             <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
@@ -187,6 +218,12 @@ export default function ContractorDashboard() {
                         <span className="text-gray-600">Submission Deadline: </span>
                         <span className="font-semibold">{new Date(opp.submissionDeadline).toLocaleDateString()}</span>
                       </div>
+                      {opp.attachments && opp.attachments > 0 && (
+                        <div className="flex items-center gap-1 text-gray-600">
+                          <Paperclip size={14} />
+                          <span>{opp.attachments} attachment{opp.attachments > 1 ? 's' : ''}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2">

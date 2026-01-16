@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Send, Clock, Menu, X, Search } from 'lucide-react';
+import { Send, Clock, Menu, X, Search, Video, Paperclip, MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 
 interface Conversation {
@@ -142,16 +142,26 @@ export default function MessagesPage() {
           {/* Chat View - Mobile Optimized */}
           {current && (
             <div className={`${showConversationList ? 'hidden' : 'flex'} md:flex md:flex-1 bg-white rounded-lg shadow-md flex-col h-full`}>
-              <div className="p-3 md:p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+              <div className="p-3 md:p-4 border-b border-gray-200 bg-gray-50">
                 <div>
-                  <h2 className="font-bold text-base md:text-lg">{current.name}</h2>
+                  <div className="flex justify-between items-start">
+                    <h2 className="font-bold text-base md:text-lg">{current.name}</h2>
+                    <div className="flex items-center gap-2">
+                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Start video call">
+                        <Video size={18} />
+                      </button>
+                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <MoreVertical size={18} />
+                      </button>
+                    </div>
+                  </div>
                   <p className="text-xs md:text-sm text-gray-600">Status: Online</p>
                 </div>
                 <button
                   onClick={() => setShowConversationList(true)}
-                  className="md:hidden text-gray-600 hover:text-gray-900"
+                  className="md:hidden text-gray-600 hover:text-gray-900 mt-2"
                 >
-                  <X size={20} />
+                  ← Back to conversations
                 </button>
               </div>
 
@@ -179,6 +189,9 @@ export default function MessagesPage() {
 
               <div className="p-3 md:p-4 border-t border-gray-200 bg-gray-50">
                 <div className="flex gap-2">
+                  <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" title="Attach file">
+                    <Paperclip size={18} />
+                  </button>
                   <input
                     type="text"
                     placeholder="Type your message..."
@@ -195,6 +208,7 @@ export default function MessagesPage() {
                     <span className="hidden sm:inline">Send</span>
                   </button>
                 </div>
+                <p className="text-xs text-gray-400 mt-2 text-center">💡 Video messaging coming soon!</p>
               </div>
             </div>
           )}

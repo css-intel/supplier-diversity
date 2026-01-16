@@ -2,13 +2,14 @@
 
 import NextLink from 'next/link';
 import { useState } from 'react';
-import { Search, MapPin, Star, Briefcase, Menu, X } from 'lucide-react';
+import { Search, MapPin, Star, Briefcase, Menu, X, FileText, Award, CheckCircle } from 'lucide-react';
 
 export default function ContractorsPage() {
   const [naceCode, setNaceCode] = useState('');
   const [location, setLocation] = useState('');
   const [minRating, setMinRating] = useState('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [certFilter, setCertFilter] = useState('all');
 
   const contractors = [
     {
@@ -20,7 +21,10 @@ export default function ContractorsPage() {
       reviews: 127,
       yearsInBusiness: 15,
       serviceAreas: ['Georgia', 'Florida', 'South Carolina'],
-      pastPerformance: 'Completed 45+ projects, 0 disputes'
+      pastPerformance: 'Completed 45+ projects, 0 disputes',
+      certifications: ['DBE', 'MBE'],
+      hasCapabilityStatement: true,
+      openToTeaming: true
     },
     {
       id: 2,
@@ -31,7 +35,10 @@ export default function ContractorsPage() {
       reviews: 94,
       yearsInBusiness: 12,
       serviceAreas: ['Texas', 'Oklahoma', 'Louisiana'],
-      pastPerformance: 'Specialized in commercial electrical, 38 projects'
+      pastPerformance: 'Specialized in commercial electrical, 38 projects',
+      certifications: ['8(a)', 'HUBZone'],
+      hasCapabilityStatement: true,
+      openToTeaming: true
     },
     {
       id: 3,
@@ -42,7 +49,10 @@ export default function ContractorsPage() {
       reviews: 83,
       yearsInBusiness: 18,
       serviceAreas: ['Colorado', 'Wyoming', 'Utah', 'New Mexico'],
-      pastPerformance: 'Management consulting, 52 completed engagements'
+      pastPerformance: 'Management consulting, 52 completed engagements',
+      certifications: ['WBE'],
+      hasCapabilityStatement: true,
+      openToTeaming: false
     },
     {
       id: 4,
@@ -53,7 +63,10 @@ export default function ContractorsPage() {
       reviews: 76,
       yearsInBusiness: 10,
       serviceAreas: ['Illinois', 'Indiana', 'Wisconsin', 'Michigan'],
-      pastPerformance: 'Residential & commercial plumbing, 156 projects'
+      pastPerformance: 'Residential & commercial plumbing, 156 projects',
+      certifications: ['MBE', 'DBE', 'SDVOSB'],
+      hasCapabilityStatement: true,
+      openToTeaming: true
     }
   ];
 
@@ -79,12 +92,15 @@ export default function ContractorsPage() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8">Find Contractors</h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold">Find Contractors</h1>
+          <p className="text-gray-600 mt-1">Search verified contractors by NACIS, location, and certifications</p>
+        </div>
 
         {/* Filter Panel - Mobile Optimized */}
         <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
           <h2 className="text-lg md:text-xl font-bold mb-4">Filter Results</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">NACIS Code</label>
               <input
@@ -118,6 +134,22 @@ export default function ContractorsPage() {
                 <option value="4.8">4.8+ Stars</option>
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Certification</label>
+              <select
+                value={certFilter}
+                onChange={(e) => setCertFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Certifications</option>
+                <option value="DBE">DBE</option>
+                <option value="MBE">MBE</option>
+                <option value="WBE">WBE</option>
+                <option value="8(a)">8(a)</option>
+                <option value="HUBZone">HUBZone</option>
+                <option value="SDVOSB">SDVOSB</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -139,6 +171,20 @@ export default function ContractorsPage() {
                   </div>
                   <p className="text-xs text-gray-600">{contractor.reviews} reviews</p>
                 </div>
+              </div>
+
+              {/* Certifications */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {contractor.certifications.map((cert) => (
+                  <span key={cert} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1">
+                    <Award size={10} /> {cert}
+                  </span>
+                ))}
+                {contractor.openToTeaming && (
+                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                    🤝 Open to Teaming
+                  </span>
+                )}
               </div>
 
               <div className="mb-3 space-y-2">
@@ -167,12 +213,25 @@ export default function ContractorsPage() {
                 </p>
               </div>
 
-              <NextLink
-                href="#"
-                className="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium text-sm"
-              >
-                View Profile
-              </NextLink>
+              {contractor.hasCapabilityStatement && (
+                <div className="flex items-center gap-2 text-xs text-green-600 mb-4">
+                  <FileText size={14} />
+                  <span>Capability Statement Available</span>
+                  <CheckCircle size={12} />
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <NextLink
+                  href="#"
+                  className="flex-1 text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium text-sm"
+                >
+                  View Profile
+                </NextLink>
+                <button className="flex-1 text-center bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 font-medium text-sm">
+                  Message
+                </button>
+              </div>
             </div>
           ))}
         </div>

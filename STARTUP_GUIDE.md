@@ -1,5 +1,12 @@
 # ContractConnect Platform - Startup Guide
 
+**Platform:** FedMatch (Supplier Diversity Matchmaker)  
+**Last Updated:** January 16, 2026  
+**Current Version:** V4 (V4.1 in development)  
+**Development:** AI-Powered via Lantern + Hydra
+
+---
+
 ## Quick Start
 
 ### Option 1: Automated (Easiest)
@@ -33,11 +40,24 @@ All references changed from NACE → NACIS throughout the platform
 - **Mobile-First Layout**: Stacked on mobile, side-by-side on desktop
 - **App-Like UI**: Sticky navigation, optimized spacing, mobile messaging interface
 
+### � AI-Powered Development (NEW!)
+- **Lantern AI**: Builds code from conversation in real-time
+- **Hydra System**: Site-wide debugging and updates
+- **Rapid Iteration**: Updates in hours instead of months
+- **Auto-Debugging**: Learns and prevents future bugs
+
 ### 📱 Works Great On:
 - iPhone/Android phones (portrait & landscape)
 - Tablets (iPad, etc.)
 - Desktop browsers
 - Any modern smartphone browser
+
+### 🔄 Coming in V4.1 (This Week):
+- Star/bookmark opportunities
+- Preview function for posts
+- Video messaging
+- Enhanced attachment management
+- Activity tracking analytics
 
 ---
 
@@ -56,17 +76,22 @@ All references changed from NACE → NACIS throughout the platform
 - Responsive grid layout
 
 ### 📋 Opportunities
-- Browse or post opportunities
+- Browse or post opportunities (RFPs, teaming requests)
 - Mobile tab interface
 - Responsive opportunity cards with key details
+- NACIS code matching with smart alerts
+- Estimated budget and deadline tracking
 
 ### 💬 Messages
 - Mobile-optimized messaging interface
 - Toggle between conversation list and chat view on mobile
 - Professional message threading
+- Video messaging (coming in V4.1)
 
 ### 📅 Events
 - Event listings and registration
+- Integration with My Virtual Check-In platform
+- Procurement matchmaking events (like Power Hours)
 
 ---
 
@@ -77,6 +102,37 @@ All references changed from NACE → NACIS throughout the platform
 2. Visit: `http://<YOUR_IP>:3001`
 
 **Example:** `http://192.168.1.100:3001`
+
+---
+
+## Related Platforms
+
+### My Virtual Check-In (MVCI)
+Sister platform for event registration and surveys:
+- **Event Management**: Like Eventbrite but integrated with FedMatch
+- **Survey Platform**: Market research and event feedback
+- **Coming Soon**: V4.1 update with custom plugins and payment integration
+
+**Integration Benefits:**
+- Events posted on MVCI can be promoted on FedMatch
+- Unified user base for contractors and procurement officers
+- Seamless event registration for matchmaking events
+
+---
+
+## Team & Development
+
+**Core Development Team:**
+- **Courtney**: Strategy & Project Lead
+- **Carmen**: Technical Lead & WordPress Development
+- **Evelyn**: Market Research & User Experience
+- **Dexter (Price)**: AI Development (Lantern/Hydra Systems)
+
+**Development Approach:**
+- AI-powered rapid prototyping
+- Real-time updates during team conversations
+- Continuous testing and iteration
+- Government-grade security and scalability
 
 ---
 
