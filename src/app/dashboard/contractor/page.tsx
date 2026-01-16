@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter, LogOut, Star, Bookmark, Paperclip } from 'lucide-react';
+import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter, LogOut, Star, Bookmark, Paperclip, CheckCircle, Download, Send, MapPin, DollarSign, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Opportunity {
@@ -17,6 +17,10 @@ interface Opportunity {
   datePosted: string;
   type: 'procurement' | 'teaming';
   attachments?: number;
+  description: string;
+  requirements: string[];
+  contactEmail: string;
+  contactName: string;
 }
 
 export default function ContractorDashboard() {
@@ -27,6 +31,27 @@ export default function ContractorDashboard() {
   const [nacisFilter, setNacisFilter] = useState('');
   const [userName, setUserName] = useState('Sarah Johnson');
   const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set(['1']));
+  
+  // Modal states
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageSubject, setMessageSubject] = useState('');
+  const [messageText, setMessageText] = useState('');
+  const [messageSent, setMessageSent] = useState(false);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [bidSubmitted, setBidSubmitted] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  
+  // Profile form state
+  const [profileData, setProfileData] = useState({
+    companyName: 'Johnson Consulting LLC',
+    email: 'sarah@johnsonconsulting.com',
+    nacisCodes: '61110, 54140, 54151',
+    serviceAreas: 'Washington, DC',
+    description: 'Full-service IT consulting and implementation firm specializing in government contracts.',
+    openTo: { teaming: true, jv: false, subcontracting: true },
+    certifications: { dbe: true, hubzone: false, eighta: true, mbe: false, wbe: true }
+  });
 
   const toggleSaved = (id: string) => {
     setSavedOpportunities(prev => {
@@ -41,13 +66,10 @@ export default function ContractorDashboard() {
   };
 
   const handleLogout = () => {
-    // Clear any auth data
     localStorage.removeItem('userAuth');
-    // Redirect to home
     router.push('/');
   };
 
-  // Mock opportunities data- remove this data once completed and approved 
   const opportunities: Opportunity[] = [
     {
       id: '1',
@@ -60,7 +82,11 @@ export default function ContractorDashboard() {
       submissionDeadline: '2026-02-15',
       datePosted: '2026-01-10',
       type: 'procurement',
-      attachments: 3
+      attachments: 3,
+      description: 'The Department of Transportation is seeking qualified vendors to modernize IT infrastructure across multiple regional offices. This includes network upgrades, cloud migration, and cybersecurity enhancements.',
+      requirements: ['Minimum 5 years IT experience', 'Active security clearance', 'Previous federal contract experience preferred', 'Cisco or AWS certifications'],
+      contactEmail: 'procurement@dot.gov',
+      contactName: 'Michael Chen'
     },
     {
       id: '2',
@@ -73,7 +99,11 @@ export default function ContractorDashboard() {
       submissionDeadline: '2026-02-20',
       datePosted: '2026-01-08',
       type: 'procurement',
-      attachments: 2
+      attachments: 2,
+      description: 'GSA requires comprehensive building maintenance services for federal facilities in the New York metropolitan area. Services include HVAC, electrical, plumbing, and general repairs.',
+      requirements: ['Licensed in NY State', 'Liability insurance $1M+', 'Experience with commercial facilities', 'Available for emergency calls'],
+      contactEmail: 'maintenance@gsa.gov',
+      contactName: 'Linda Thompson'
     },
     {
       id: '3',
@@ -85,7 +115,11 @@ export default function ContractorDashboard() {
       submissionDeadline: '2026-03-01',
       datePosted: '2026-01-12',
       type: 'teaming',
-      attachments: 1
+      attachments: 1,
+      description: 'Established construction firm seeking certified DBE/MBE partner for upcoming federal construction project. Looking for complementary capabilities in concrete and steel work.',
+      requirements: ['DBE or MBE certification', 'Bonding capacity $500K+', 'Commercial construction experience', 'Safety certifications current'],
+      contactEmail: 'partnerships@localconstruction.com',
+      contactName: 'James Wilson'
     }
   ];
 
@@ -95,6 +129,44 @@ export default function ContractorDashboard() {
     const matchesNacis = nacisFilter ? opp.nacisCodes.some(code => code.includes(nacisFilter)) : true;
     return matchesSearch && matchesNacis;
   });
+
+  const handleViewDetails = (opp: Opportunity) => {
+    setSelectedOpportunity(opp);
+  };
+
+  const handleMessage = (opp: Opportunity) => {
+    setSelectedOpportunity(opp);
+    setMessageSubject(`Inquiry about: ${opp.title}`);
+    setShowMessageModal(true);
+  };
+
+  const handleSendMessage = () => {
+    if (messageText.trim()) {
+      setMessageSent(true);
+      setTimeout(() => {
+        setMessageSent(false);
+        setShowMessageModal(false);
+        setMessageText('');
+        setMessageSubject('');
+      }, 2000);
+    }
+  };
+
+  const handleSubmitBid = (e: React.FormEvent) => {
+    e.preventDefault();
+    setBidSubmitted(true);
+    setTimeout(() => {
+      setBidSubmitted(false);
+      setShowBidModal(false);
+      setSelectedOpportunity(null);
+    }, 2000);
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 3000);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,10 +182,10 @@ export default function ContractorDashboard() {
           </button>
           
           <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <button onClick={() => {setActiveTab('opportunities'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">Opportunities</button>
-            <button onClick={() => {setActiveTab('profile'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">My Profile</button>
-            <button onClick={() => {setActiveTab('alerts'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">Alerts</button>
-            <button onClick={() => {setActiveTab('messages'); setMobileMenuOpen(false);}} className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</button>
+            <button onClick={() => {setActiveTab('opportunities'); setMobileMenuOpen(false);}} className={`font-medium text-left ${activeTab === 'opportunities' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Opportunities</button>
+            <button onClick={() => {setActiveTab('profile'); setMobileMenuOpen(false);}} className={`font-medium text-left ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>My Profile</button>
+            <button onClick={() => {setActiveTab('alerts'); setMobileMenuOpen(false);}} className={`font-medium text-left ${activeTab === 'alerts' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Alerts</button>
+            <Link href="/messages" className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</Link>
             <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
               <LogOut size={16} /> Logout
             </button>
@@ -127,6 +199,20 @@ export default function ContractorDashboard() {
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Welcome, {userName}</h1>
           <p className="text-gray-600">Manage your profile, find opportunities, and grow your business</p>
+          <div className="flex gap-4 mt-4 flex-wrap">
+            <div className="bg-blue-50 px-4 py-2 rounded-lg">
+              <span className="text-blue-600 font-semibold">{savedOpportunities.size}</span>
+              <span className="text-gray-600 ml-1">Saved</span>
+            </div>
+            <div className="bg-green-50 px-4 py-2 rounded-lg">
+              <span className="text-green-600 font-semibold">3</span>
+              <span className="text-gray-600 ml-1">Active Bids</span>
+            </div>
+            <div className="bg-purple-50 px-4 py-2 rounded-lg">
+              <span className="text-purple-600 font-semibold">2</span>
+              <span className="text-gray-600 ml-1">New Messages</span>
+            </div>
+          </div>
         </div>
 
         {/* Opportunities Tab */}
@@ -197,26 +283,19 @@ export default function ContractorDashboard() {
                           ))}
                         </div>
                       </div>
-                      <div>
-                        <span className="text-gray-600">Location: </span>
+                      <div className="flex items-center gap-1">
+                        <MapPin size={14} className="text-gray-400" />
                         <span className="font-semibold">{opp.location}</span>
                       </div>
                       {opp.budget && (
-                        <div>
-                          <span className="text-gray-600">Budget: </span>
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={14} className="text-gray-400" />
                           <span className="font-semibold">${opp.budget.min.toLocaleString()} - ${opp.budget.max.toLocaleString()}</span>
                         </div>
                       )}
-                      {!opp.budget && opp.estimatedBudget && (
-                        <div>
-                          <span className="text-gray-600">Estimated Budget: </span>
-                          <span className="font-semibold text-blue-600">${opp.estimatedBudget.min.toLocaleString()} - ${opp.estimatedBudget.max.toLocaleString()}</span>
-                          <span className="text-xs text-gray-500 block">*AI Estimated</span>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-gray-600">Submission Deadline: </span>
-                        <span className="font-semibold">{new Date(opp.submissionDeadline).toLocaleDateString()}</span>
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} className="text-gray-400" />
+                        <span className="font-semibold">Due: {new Date(opp.submissionDeadline).toLocaleDateString()}</span>
                       </div>
                       {opp.attachments && opp.attachments > 0 && (
                         <div className="flex items-center gap-1 text-gray-600">
@@ -227,10 +306,16 @@ export default function ContractorDashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 text-sm">
+                      <button 
+                        onClick={() => handleViewDetails(opp)}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 text-sm"
+                      >
                         View Details
                       </button>
-                      <button className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 text-sm">
+                      <button 
+                        onClick={() => handleMessage(opp)}
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 text-sm"
+                      >
                         Message
                       </button>
                     </div>
@@ -249,43 +334,82 @@ export default function ContractorDashboard() {
         {activeTab === 'profile' && (
           <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
             <h2 className="text-2xl font-bold mb-6">My Profile</h2>
-            <form className="space-y-6">
+            {profileSaved && (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
+                <CheckCircle size={20} />
+                Profile saved successfully!
+              </div>
+            )}
+            <form className="space-y-6" onSubmit={handleSaveProfile}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Company Name</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Your Company" />
+                  <input 
+                    type="text" 
+                    value={profileData.companyName}
+                    onChange={(e) => setProfileData({...profileData, companyName: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
-                  <input type="email" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="your@email.com" />
+                  <input 
+                    type="email" 
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                  />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">NACIS Codes (comma-separated, 5-digit)</label>
-                <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., 61110, 54140, 23600" />
-                <p className="text-xs text-gray-600 mt-1">Enter all NACIS codes that represent your services</p>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">NAICS Codes (comma-separated)</label>
+                <input 
+                  type="text" 
+                  value={profileData.nacisCodes}
+                  onChange={(e) => setProfileData({...profileData, nacisCodes: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Service Areas</label>
-                <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., City, State" />
+                <input 
+                  type="text" 
+                  value={profileData.serviceAreas}
+                  onChange={(e) => setProfileData({...profileData, serviceAreas: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Open To</label>
-                <p className="text-xs text-gray-600 mb-3">Select the types of opportunities you're interested in:</p>
                 <div className="space-y-2">
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.openTo.teaming}
+                      onChange={(e) => setProfileData({...profileData, openTo: {...profileData.openTo, teaming: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
                     <span className="ml-2 text-gray-700">Teaming Agreements</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.openTo.jv}
+                      onChange={(e) => setProfileData({...profileData, openTo: {...profileData.openTo, jv: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
                     <span className="ml-2 text-gray-700">Joint Ventures (JV)</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.openTo.subcontracting}
+                      onChange={(e) => setProfileData({...profileData, openTo: {...profileData.openTo, subcontracting: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
                     <span className="ml-2 text-gray-700">Subcontracting</span>
                   </label>
                 </div>
@@ -293,31 +417,61 @@ export default function ContractorDashboard() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Business Description</label>
-                <textarea className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" rows={4} placeholder="Describe your business..." />
+                <textarea 
+                  value={profileData.description}
+                  onChange={(e) => setProfileData({...profileData, description: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                  rows={4} 
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Certifications</label>
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                    <span className="ml-2 text-gray-700">DBE (Disadvantaged Business Enterprise)</span>
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.certifications.dbe}
+                      onChange={(e) => setProfileData({...profileData, certifications: {...profileData.certifications, dbe: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
+                    <span className="ml-2 text-gray-700">DBE</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.certifications.hubzone}
+                      onChange={(e) => setProfileData({...profileData, certifications: {...profileData.certifications, hubzone: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
                     <span className="ml-2 text-gray-700">HUBZone</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.certifications.eighta}
+                      onChange={(e) => setProfileData({...profileData, certifications: {...profileData.certifications, eighta: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
                     <span className="ml-2 text-gray-700">8(a) Program</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                    <span className="ml-2 text-gray-700">MBE (Minority Business Enterprise)</span>
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.certifications.mbe}
+                      onChange={(e) => setProfileData({...profileData, certifications: {...profileData.certifications, mbe: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
+                    <span className="ml-2 text-gray-700">MBE</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                    <span className="ml-2 text-gray-700">WBE (Women Business Enterprise)</span>
+                    <input 
+                      type="checkbox" 
+                      checked={profileData.certifications.wbe}
+                      onChange={(e) => setProfileData({...profileData, certifications: {...profileData.certifications, wbe: e.target.checked}})}
+                      className="w-4 h-4" 
+                    />
+                    <span className="ml-2 text-gray-700">WBE</span>
                   </label>
                 </div>
               </div>
@@ -337,42 +491,314 @@ export default function ContractorDashboard() {
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div>
                   <h3 className="font-semibold text-gray-900">New Matching Opportunities</h3>
-                  <p className="text-sm text-gray-600">Get notified when new opportunities match your NACIS codes</p>
+                  <p className="text-sm text-gray-600">Get notified when new opportunities match your NAICS codes</p>
                 </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
+                <input type="checkbox" defaultChecked className="w-5 h-5 accent-blue-600" />
               </div>
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div>
                   <h3 className="font-semibold text-gray-900">New Messages</h3>
                   <p className="text-sm text-gray-600">Get notified when you receive messages</p>
                 </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
+                <input type="checkbox" defaultChecked className="w-5 h-5 accent-blue-600" />
               </div>
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div>
                   <h3 className="font-semibold text-gray-900">Events & Training</h3>
                   <p className="text-sm text-gray-600">Get notified about new events and training sessions</p>
                 </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
+                <input type="checkbox" defaultChecked className="w-5 h-5 accent-blue-600" />
+              </div>
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-gray-900">Deadline Reminders</h3>
+                  <p className="text-sm text-gray-600">Remind me 3 days before submission deadlines</p>
+                </div>
+                <input type="checkbox" defaultChecked className="w-5 h-5 accent-blue-600" />
               </div>
             </div>
           </div>
         )}
+      </div>
 
-        {/* Messages Tab */}
-        {activeTab === 'messages' && (
-          <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
-            <h2 className="text-2xl font-bold mb-6">Messages</h2>
-            <div className="text-center py-12">
-              <MessageSquare size={48} className="text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600">No messages yet. Start communicating with procurement officers!</p>
-              <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-                Start Conversation
+      {/* Opportunity Details Modal */}
+      {selectedOpportunity && !showMessageModal && !showBidModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedOpportunity.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                    {selectedOpportunity.type === 'teaming' ? 'Teaming Opportunity' : 'Procurement'}
+                  </span>
+                  <h2 className="text-2xl font-bold mt-2">{selectedOpportunity.title}</h2>
+                  <p className="text-gray-600">{selectedOpportunity.agency}</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedOpportunity(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                <p className="text-gray-700">{selectedOpportunity.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm text-gray-600">Location</span>
+                  <p className="font-semibold">{selectedOpportunity.location}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Budget</span>
+                  <p className="font-semibold">
+                    ${(selectedOpportunity.budget || selectedOpportunity.estimatedBudget)?.min.toLocaleString()} - 
+                    ${(selectedOpportunity.budget || selectedOpportunity.estimatedBudget)?.max.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Submission Deadline</span>
+                  <p className="font-semibold">{new Date(selectedOpportunity.submissionDeadline).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Contact</span>
+                  <p className="font-semibold">{selectedOpportunity.contactName}</p>
+                  <p className="text-sm text-blue-600">{selectedOpportunity.contactEmail}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">NAICS Codes</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {selectedOpportunity.nacisCodes.map((code, idx) => (
+                    <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+                      {code}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Requirements</h3>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                  {selectedOpportunity.requirements.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {selectedOpportunity.attachments && selectedOpportunity.attachments > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Attachments</h3>
+                  <div className="space-y-2">
+                    <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                      <Paperclip size={16} />
+                      <span>RFQ_Document.pdf</span>
+                      <Download size={16} />
+                    </button>
+                    <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                      <Paperclip size={16} />
+                      <span>Scope_of_Work.docx</span>
+                      <Download size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex gap-3">
+              <button 
+                onClick={() => {
+                  toggleSaved(selectedOpportunity.id);
+                }}
+                className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${savedOpportunities.has(selectedOpportunity.id) ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                <Star size={18} fill={savedOpportunities.has(selectedOpportunity.id) ? 'currentColor' : 'none'} />
+                {savedOpportunities.has(selectedOpportunity.id) ? 'Saved' : 'Save'}
+              </button>
+              <button 
+                onClick={() => {
+                  setShowMessageModal(true);
+                  setMessageSubject(`Inquiry about: ${selectedOpportunity.title}`);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 flex items-center gap-2"
+              >
+                <MessageSquare size={18} />
+                Message
+              </button>
+              <button 
+                onClick={() => setShowBidModal(true)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              >
+                {selectedOpportunity.type === 'teaming' ? 'Express Interest' : 'Submit Bid'}
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Message Modal */}
+      {showMessageModal && selectedOpportunity && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full">
+            {messageSent ? (
+              <div className="p-8 text-center">
+                <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                <p className="text-gray-600">Your message has been sent to {selectedOpportunity.contactName}.</p>
+              </div>
+            ) : (
+              <>
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold">Send Message</h2>
+                    <button 
+                      onClick={() => {setShowMessageModal(false); setMessageText('');}}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+                  <p className="text-gray-600 text-sm mt-1">To: {selectedOpportunity.contactName} ({selectedOpportunity.agency})</p>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Subject</label>
+                    <input
+                      type="text"
+                      value={messageSubject}
+                      onChange={(e) => setMessageSubject(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Message</label>
+                    <textarea
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      rows={5}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Type your message here..."
+                    />
+                  </div>
+                </div>
+                <div className="p-6 border-t border-gray-200 flex gap-3">
+                  <button 
+                    onClick={() => {setShowMessageModal(false); setMessageText('');}}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSendMessage}
+                    disabled={!messageText.trim()}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Send size={18} />
+                    Send Message
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bid Submission Modal */}
+      {showBidModal && selectedOpportunity && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            {bidSubmitted ? (
+              <div className="p-8 text-center">
+                <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {selectedOpportunity.type === 'teaming' ? 'Interest Submitted!' : 'Bid Submitted!'}
+                </h3>
+                <p className="text-gray-600">
+                  {selectedOpportunity.type === 'teaming' 
+                    ? 'Your interest has been submitted. The contractor will contact you shortly.'
+                    : 'Your bid has been submitted successfully. You will receive a confirmation email.'}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitBid}>
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold">
+                      {selectedOpportunity.type === 'teaming' ? 'Express Interest' : 'Submit Bid'}
+                    </h2>
+                    <button 
+                      type="button"
+                      onClick={() => setShowBidModal(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+                  <p className="text-gray-600 text-sm mt-1">{selectedOpportunity.title}</p>
+                </div>
+                <div className="p-6 space-y-4">
+                  {selectedOpportunity.type === 'procurement' && (
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Bid Amount ($)</label>
+                      <input
+                        type="number"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter your bid amount"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      {selectedOpportunity.type === 'teaming' ? 'Why are you a good fit?' : 'Executive Summary'}
+                    </label>
+                    <textarea
+                      required
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder={selectedOpportunity.type === 'teaming' 
+                        ? 'Describe your relevant experience and why you would be a good teaming partner...'
+                        : 'Provide a brief summary of your proposal...'}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Attach Documents</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <Paperclip className="mx-auto text-gray-400 mb-2" size={24} />
+                      <p className="text-sm text-gray-600">Drag and drop files here, or click to browse</p>
+                      <input type="file" className="hidden" id="fileUpload" />
+                      <label htmlFor="fileUpload" className="mt-2 inline-block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 text-sm">
+                        Choose Files
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 border-t border-gray-200 flex gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setShowBidModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+                  >
+                    {selectedOpportunity.type === 'teaming' ? 'Submit Interest' : 'Submit Bid'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

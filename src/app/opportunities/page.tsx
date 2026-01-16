@@ -2,15 +2,49 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { MapPin, DollarSign, Clock, Users, Menu, X, Star, Bookmark, Calendar, Filter, Eye, FileText, Paperclip } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Menu, X, Star, Bookmark, Calendar, Filter, Eye, FileText, Paperclip, Send, MessageSquare, CheckCircle, Upload } from 'lucide-react';
+
+interface Opportunity {
+  id: number;
+  title: string;
+  nacis: string;
+  location: string;
+  budgetMin: number;
+  budgetMax: number;
+  deadline: string;
+  datePosted: string;
+  description: string;
+  bids: number;
+  postedBy: string;
+  type: 'procurement' | 'teaming';
+  attachments: number;
+  requirements?: string[];
+  contactEmail?: string;
+}
 
 export default function OpportunitiesPage() {
   const [activeTab, setActiveTab] = useState('browse');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<'all' | 'procurement' | 'teaming'>('all');
   const [savedOpportunities, setSavedOpportunities] = useState<number[]>([]);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [bidSubmitted, setBidSubmitted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const opportunities = [
+  const [newOpportunity, setNewOpportunity] = useState({
+    type: 'procurement',
+    title: '',
+    nacis: '',
+    location: '',
+    budgetMin: '',
+    budgetMax: '',
+    description: '',
+    deadline: ''
+  });
+
+  const opportunities: Opportunity[] = [
     {
       id: 1,
       title: 'Commercial Building Electrical Work',
@@ -20,11 +54,13 @@ export default function OpportunitiesPage() {
       budgetMax: 75000,
       deadline: '2026-02-15',
       datePosted: '2026-01-10',
-      description: 'Need experienced electrical contractor for new commercial building. Must have 10+ years experience and valid licenses.',
+      description: 'Need experienced electrical contractor for new commercial building. Must have 10+ years experience and valid licenses. The project involves complete electrical installation for a 50,000 sq ft office building including lighting, power distribution, fire alarm systems, and low-voltage wiring.',
       bids: 12,
       postedBy: 'John Smith - City of Chicago',
-      type: 'procurement' as const,
-      attachments: 2
+      type: 'procurement',
+      attachments: 2,
+      requirements: ['Valid electrical contractor license', '10+ years commercial experience', 'Bonded and insured', 'OSHA certified'],
+      contactEmail: 'jsmith@chicago.gov'
     },
     {
       id: 2,
@@ -35,11 +71,13 @@ export default function OpportunitiesPage() {
       budgetMax: 45000,
       deadline: '2026-02-20',
       datePosted: '2026-01-12',
-      description: 'Large-scale HVAC installation for new office complex. Looking for certified HVAC contractors with commercial experience.',
+      description: 'Large-scale HVAC installation for new office complex. Looking for certified HVAC contractors with commercial experience. Project includes rooftop units, ductwork, controls, and commissioning.',
       bids: 8,
       postedBy: 'Sarah Johnson - Denver County',
-      type: 'procurement' as const,
-      attachments: 1
+      type: 'procurement',
+      attachments: 1,
+      requirements: ['EPA 608 certification', 'Commercial HVAC experience', 'Manufacturer certifications preferred'],
+      contactEmail: 'sjohnson@denvercounty.gov'
     },
     {
       id: 3,
@@ -50,11 +88,13 @@ export default function OpportunitiesPage() {
       budgetMax: 150000,
       deadline: '2026-03-01',
       datePosted: '2026-01-14',
-      description: 'Prime contractor seeking MBE/WBE partner for federal construction project. Joint venture or subcontracting arrangement available.',
+      description: 'Prime contractor seeking MBE/WBE partner for federal construction project. Joint venture or subcontracting arrangement available. This is a great opportunity to build past performance on federal contracts.',
       bids: 15,
       postedBy: 'Mike Davis - Atlas Construction LLC',
-      type: 'teaming' as const,
-      attachments: 3
+      type: 'teaming',
+      attachments: 3,
+      requirements: ['MBE, WBE, or 8(a) certified', 'Construction experience', 'Ability to obtain security clearance'],
+      contactEmail: 'mdavis@atlasconstruction.com'
     },
     {
       id: 4,
@@ -65,11 +105,13 @@ export default function OpportunitiesPage() {
       budgetMax: 500000,
       deadline: '2026-02-28',
       datePosted: '2026-01-15',
-      description: 'Seeking 8(a) or HUBZone certified IT firm for teaming on federal IT modernization contract. Strong past performance required.',
+      description: 'Seeking 8(a) or HUBZone certified IT firm for teaming on federal IT modernization contract. Strong past performance required. Looking for partners with cloud migration and cybersecurity expertise.',
       bids: 6,
       postedBy: 'TechPro Solutions Inc.',
-      type: 'teaming' as const,
-      attachments: 4
+      type: 'teaming',
+      attachments: 4,
+      requirements: ['8(a) or HUBZone certification', 'Cloud migration experience', 'FedRAMP knowledge', 'Active security clearances'],
+      contactEmail: 'partnerships@techprosolutions.com'
     },
     {
       id: 5,
@@ -80,17 +122,24 @@ export default function OpportunitiesPage() {
       budgetMax: 30000,
       deadline: '2026-02-25',
       datePosted: '2026-01-08',
-      description: 'Annual maintenance and emergency plumbing services for office building. Must be available for 24/7 emergency calls.',
+      description: 'Annual maintenance and emergency plumbing services for office building. Must be available for 24/7 emergency calls. Contract includes preventive maintenance and on-call repairs.',
       bids: 6,
       postedBy: 'Lisa Chen - Miami Office Management',
-      type: 'procurement' as const,
-      attachments: 1
+      type: 'procurement',
+      attachments: 1,
+      requirements: ['Licensed plumber', '24/7 availability', 'Commercial experience', 'References required'],
+      contactEmail: 'lchen@miamioffice.com'
     }
   ];
 
-  const filteredOpportunities = opportunities.filter(opp => 
-    typeFilter === 'all' || opp.type === typeFilter
-  );
+  const filteredOpportunities = opportunities.filter(opp => {
+    const matchesType = typeFilter === 'all' || opp.type === typeFilter;
+    const matchesSearch = searchQuery === '' || 
+      opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      opp.nacis.includes(searchQuery) ||
+      opp.location.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesType && matchesSearch;
+  });
 
   const toggleSave = (id: number) => {
     setSavedOpportunities(prev => 
@@ -106,16 +155,56 @@ export default function OpportunitiesPage() {
     return diffDays;
   };
 
+  const handleViewDetails = (opp: Opportunity) => {
+    setSelectedOpportunity(opp);
+  };
+
+  const handleSubmitBid = (opp: Opportunity) => {
+    setSelectedOpportunity(opp);
+    setShowBidModal(true);
+  };
+
+  const handleBidSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setBidSubmitted(true);
+    setTimeout(() => {
+      setShowBidModal(false);
+      setBidSubmitted(false);
+      setSelectedOpportunity(null);
+    }, 2000);
+  };
+
+  const handlePostOpportunity = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert('Opportunity posted successfully! It will be visible to contractors matching your NAICS code.');
+    setNewOpportunity({
+      type: 'procurement',
+      title: '',
+      nacis: '',
+      location: '',
+      budgetMin: '',
+      budgetMax: '',
+      description: '',
+      deadline: ''
+    });
+    setActiveTab('browse');
+  };
+
+  const handlePreview = () => {
+    if (newOpportunity.title && newOpportunity.nacis) {
+      setShowPreviewModal(true);
+    } else {
+      alert('Please fill in at least Title and NAICS Code to preview');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2"
-          >
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2">
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
@@ -141,14 +230,12 @@ export default function OpportunitiesPage() {
           )}
         </div>
 
-        {/* Tab Navigation - Mobile Optimized */}
+        {/* Tab Navigation */}
         <div className="flex gap-2 md:gap-4 mb-6 md:mb-8 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('browse')}
             className={`px-4 py-3 font-medium text-sm md:text-base border-b-2 transition ${
-              activeTab === 'browse'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+              activeTab === 'browse' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
             }`}
           >
             Browse Opportunities
@@ -156,9 +243,7 @@ export default function OpportunitiesPage() {
           <button
             onClick={() => setActiveTab('create')}
             className={`px-4 py-3 font-medium text-sm md:text-base border-b-2 transition ${
-              activeTab === 'create'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+              activeTab === 'create' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900'
             }`}
           >
             Post Opportunity
@@ -168,6 +253,17 @@ export default function OpportunitiesPage() {
         {/* Browse Tab */}
         {activeTab === 'browse' && (
           <div className="space-y-4 md:space-y-6">
+            {/* Search Bar */}
+            <div className="bg-white rounded-lg shadow-md p-4">
+              <input
+                type="text"
+                placeholder="Search by title, NAICS code, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
             {/* Type Filter */}
             <div className="bg-white rounded-lg shadow-md p-4">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -179,9 +275,7 @@ export default function OpportunitiesPage() {
                   <button
                     onClick={() => setTypeFilter('all')}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                      typeFilter === 'all' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      typeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     All ({opportunities.length})
@@ -189,9 +283,7 @@ export default function OpportunitiesPage() {
                   <button
                     onClick={() => setTypeFilter('procurement')}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                      typeFilter === 'procurement' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      typeFilter === 'procurement' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     🏛️ Procurement ({opportunities.filter(o => o.type === 'procurement').length})
@@ -199,9 +291,7 @@ export default function OpportunitiesPage() {
                   <button
                     onClick={() => setTypeFilter('teaming')}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                      typeFilter === 'teaming' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      typeFilter === 'teaming' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     🤝 Teaming ({opportunities.filter(o => o.type === 'teaming').length})
@@ -221,9 +311,7 @@ export default function OpportunitiesPage() {
                         <button 
                           onClick={() => toggleSave(opp.id)}
                           className={`p-1 rounded transition flex-shrink-0 ${
-                            savedOpportunities.includes(opp.id) 
-                              ? 'text-yellow-500' 
-                              : 'text-gray-300 hover:text-yellow-500'
+                            savedOpportunities.includes(opp.id) ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'
                           }`}
                           title={savedOpportunities.includes(opp.id) ? 'Remove from saved' : 'Save opportunity'}
                         >
@@ -234,9 +322,7 @@ export default function OpportunitiesPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-xs md:text-sm font-semibold px-3 py-1 rounded-full ${
-                        opp.type === 'teaming' 
-                          ? 'bg-purple-100 text-purple-700' 
-                          : 'bg-blue-100 text-blue-700'
+                        opp.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                       }`}>
                         {opp.type === 'teaming' ? '🤝 Teaming' : '🏛️ Procurement'}
                       </span>
@@ -249,7 +335,7 @@ export default function OpportunitiesPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-4">
                   <div className="text-xs md:text-sm">
-                    <p className="text-gray-600">NACIS Code</p>
+                    <p className="text-gray-600">NAICS Code</p>
                     <p className="font-semibold text-gray-900">{opp.nacis}</p>
                   </div>
                   <div className="text-xs md:text-sm">
@@ -285,16 +371,28 @@ export default function OpportunitiesPage() {
                 )}
 
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium text-sm md:text-base transition flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => handleViewDetails(opp)}
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium text-sm md:text-base transition flex items-center justify-center gap-2"
+                  >
                     <Eye size={16} />
                     View Details
                   </button>
-                  <button className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 font-medium text-sm md:text-base transition">
+                  <button 
+                    onClick={() => handleSubmitBid(opp)}
+                    className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 font-medium text-sm md:text-base transition"
+                  >
                     {opp.type === 'teaming' ? 'Express Interest' : 'Submit Bid'}
                   </button>
                 </div>
               </div>
             ))}
+
+            {filteredOpportunities.length === 0 && (
+              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                <p className="text-gray-600">No opportunities found matching your criteria.</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -305,118 +403,126 @@ export default function OpportunitiesPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-2">Post New Opportunity</h2>
               <p className="text-sm text-gray-600">Create a procurement opportunity or find teaming partners</p>
             </div>
-            <form className="space-y-4 md:space-y-6">
+            <form onSubmit={handlePostOpportunity} className="space-y-4 md:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Opportunity Type *
-                </label>
-                <select className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Opportunity Type *</label>
+                <select 
+                  value={newOpportunity.type}
+                  onChange={(e) => setNewOpportunity({...newOpportunity, type: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <option value="procurement">🏛️ Procurement - Direct RFP/Contract</option>
                   <option value="teaming">🤝 Teaming - Looking for Partners</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Opportunity Title *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Opportunity Title *</label>
                 <input
                   type="text"
+                  required
+                  value={newOpportunity.title}
+                  onChange={(e) => setNewOpportunity({...newOpportunity, title: e.target.value})}
                   placeholder="e.g., Electrical Work for Commercial Building"
-                  className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    NACIS Code *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">NAICS Code *</label>
                   <input
                     type="text"
+                    required
+                    value={newOpportunity.nacis}
+                    onChange={(e) => setNewOpportunity({...newOpportunity, nacis: e.target.value})}
                     placeholder="e.g., 27110"
-                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location/Service Area *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location *</label>
                   <input
                     type="text"
+                    required
+                    value={newOpportunity.location}
+                    onChange={(e) => setNewOpportunity({...newOpportunity, location: e.target.value})}
                     placeholder="City, State"
-                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Estimated Budget Min ($)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Budget Min ($)</label>
                   <input
                     type="number"
+                    value={newOpportunity.budgetMin}
+                    onChange={(e) => setNewOpportunity({...newOpportunity, budgetMin: e.target.value})}
                     placeholder="50000"
-                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Estimated Budget Max ($)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Budget Max ($)</label>
                   <input
                     type="number"
+                    value={newOpportunity.budgetMax}
+                    onChange={(e) => setNewOpportunity({...newOpportunity, budgetMax: e.target.value})}
                     placeholder="75000"
-                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
                 <textarea
                   rows={4}
+                  required
+                  value={newOpportunity.description}
+                  onChange={(e) => setNewOpportunity({...newOpportunity, description: e.target.value})}
                   placeholder="Describe the opportunity, requirements, timeline, etc."
-                  className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Application Deadline *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Deadline *</label>
                 <input
                   type="date"
-                  className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  value={newOpportunity.deadline}
+                  onChange={(e) => setNewOpportunity({...newOpportunity, deadline: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Paperclip size={14} className="inline mr-1" />
-                  Attachments (RFP documents, addendums)
+                  Attachments
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition cursor-pointer">
-                  <FileText size={32} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600">Drag and drop files or click to upload</p>
-                  <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB each</p>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 cursor-pointer">
+                  <Upload size={32} className="mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">Drag and drop or click to upload</p>
+                  <p className="text-xs text-gray-500 mt-1">PDF, DOC up to 10MB</p>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <button
                   type="button"
-                  className="flex-1 bg-gray-200 text-gray-800 py-2 md:py-3 rounded-lg hover:bg-gray-300 font-medium text-sm md:text-base transition flex items-center justify-center gap-2"
+                  onClick={handlePreview}
+                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-medium flex items-center justify-center gap-2"
                 >
                   <Eye size={16} />
                   Preview
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 md:py-3 rounded-lg hover:bg-blue-700 font-medium text-sm md:text-base transition"
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-medium"
                 >
                   Post Opportunity
                 </button>
@@ -425,6 +531,267 @@ export default function OpportunitiesPage() {
           </div>
         )}
       </div>
+
+      {/* View Details Modal */}
+      {selectedOpportunity && !showBidModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    selectedOpportunity.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {selectedOpportunity.type === 'teaming' ? '🤝 Teaming Opportunity' : '🏛️ Procurement'}
+                  </span>
+                  <h2 className="text-2xl font-bold text-gray-900 mt-2">{selectedOpportunity.title}</h2>
+                  <p className="text-gray-600 mt-1">{selectedOpportunity.postedBy}</p>
+                </div>
+                <button onClick={() => setSelectedOpportunity(null)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600">NAICS Code</p>
+                  <p className="font-semibold">{selectedOpportunity.nacis}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Location</p>
+                  <p className="font-semibold">{selectedOpportunity.location}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Budget Range</p>
+                  <p className="font-semibold">${selectedOpportunity.budgetMin.toLocaleString()} - ${selectedOpportunity.budgetMax.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Deadline</p>
+                  <p className="font-semibold text-red-600">{new Date(selectedOpportunity.deadline).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                <p className="text-gray-700">{selectedOpportunity.description}</p>
+              </div>
+
+              {selectedOpportunity.requirements && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Requirements</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    {selectedOpportunity.requirements.map((req, i) => (
+                      <li key={i}>{req}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {selectedOpportunity.attachments > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Attachments</h3>
+                  <div className="space-y-2">
+                    {Array.from({length: selectedOpportunity.attachments}).map((_, i) => (
+                      <button key={i} className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                        <FileText size={16} />
+                        <span>Document_{i+1}.pdf</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button 
+                  onClick={() => setShowBidModal(true)}
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold flex items-center justify-center gap-2"
+                >
+                  <Send size={18} />
+                  {selectedOpportunity.type === 'teaming' ? 'Express Interest' : 'Submit Bid'}
+                </button>
+                <button 
+                  onClick={() => toggleSave(selectedOpportunity.id)}
+                  className={`px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 ${
+                    savedOpportunities.includes(selectedOpportunity.id)
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Star size={18} className={savedOpportunities.includes(selectedOpportunity.id) ? 'fill-yellow-500' : ''} />
+                </button>
+                <Link href="/messages" className="px-4 py-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold flex items-center justify-center gap-2">
+                  <MessageSquare size={18} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bid Submission Modal */}
+      {showBidModal && selectedOpportunity && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
+            <div className="p-6">
+              {bidSubmitted ? (
+                <div className="text-center py-8">
+                  <CheckCircle size={64} className="mx-auto text-green-500 mb-4" />
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {selectedOpportunity.type === 'teaming' ? 'Interest Submitted!' : 'Bid Submitted!'}
+                  </h2>
+                  <p className="text-gray-600">The poster will be notified.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {selectedOpportunity.type === 'teaming' ? 'Express Interest' : 'Submit Your Bid'}
+                      </h2>
+                      <p className="text-sm text-gray-600 mt-1">{selectedOpportunity.title}</p>
+                    </div>
+                    <button onClick={() => { setShowBidModal(false); setSelectedOpportunity(null); }} className="text-gray-400 hover:text-gray-600">
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleBidSubmit} className="space-y-4">
+                    {selectedOpportunity.type === 'procurement' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Bid Amount ($) *</label>
+                        <input
+                          type="number"
+                          required
+                          placeholder="Enter your bid"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {selectedOpportunity.type === 'teaming' ? 'Why are you a good partner?' : 'Proposal Summary'} *
+                      </label>
+                      <textarea
+                        rows={4}
+                        required
+                        placeholder={selectedOpportunity.type === 'teaming' 
+                          ? "Describe your experience and certifications..."
+                          : "Summarize your approach..."
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Timeline</label>
+                      <input
+                        type="text"
+                        placeholder="e.g., 4-6 weeks"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Attach Documents</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 cursor-pointer">
+                        <Upload size={24} className="mx-auto text-gray-400 mb-1" />
+                        <p className="text-sm text-gray-600">Upload capability statement</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => { setShowBidModal(false); setSelectedOpportunity(null); }}
+                        className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold flex items-center justify-center gap-2"
+                      >
+                        <Send size={18} />
+                        Submit
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className="text-xs text-gray-500">Preview</span>
+                  <h2 className="text-xl font-bold text-gray-900">{newOpportunity.title || 'Untitled'}</h2>
+                </div>
+                <button onClick={() => setShowPreviewModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                  newOpportunity.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {newOpportunity.type === 'teaming' ? '🤝 Teaming' : '🏛️ Procurement'}
+                </span>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <p className="text-sm text-gray-600">NAICS</p>
+                    <p className="font-semibold">{newOpportunity.nacis || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Location</p>
+                    <p className="font-semibold">{newOpportunity.location || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Budget</p>
+                    <p className="font-semibold">
+                      {newOpportunity.budgetMin && newOpportunity.budgetMax 
+                        ? `$${Number(newOpportunity.budgetMin).toLocaleString()} - $${Number(newOpportunity.budgetMax).toLocaleString()}`
+                        : '-'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Deadline</p>
+                    <p className="font-semibold">{newOpportunity.deadline ? new Date(newOpportunity.deadline).toLocaleDateString() : '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                <p className="text-gray-700">{newOpportunity.description || 'No description'}</p>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button onClick={() => setShowPreviewModal(false)} className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold">
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPreviewModal(false);
+                    handlePostOpportunity(new Event('submit') as unknown as React.FormEvent);
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
