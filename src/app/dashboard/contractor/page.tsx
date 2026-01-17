@@ -44,13 +44,13 @@ export default function ContractorDashboard() {
   
   // Profile form state
   const [profileData, setProfileData] = useState({
-    companyName: 'Johnson Consulting LLC',
-    email: 'sarah@johnsonconsulting.com',
-    nacisCodes: '61110, 54140, 54151',
-    serviceAreas: 'Washington, DC',
-    description: 'Full-service IT consulting and implementation firm specializing in government contracts.',
-    openTo: { teaming: true, jv: false, subcontracting: true },
-    certifications: { dbe: true, hubzone: false, eighta: true, mbe: false, wbe: true }
+    companyName: '',
+    email: '',
+    nacisCodes: '',
+    serviceAreas: '',
+    description: '',
+    openTo: { teaming: false, jv: false, subcontracting: false },
+    certifications: { dbe: false, hubzone: false, eighta: false, mbe: false, wbe: false }
   });
 
   const toggleSaved = (id: string) => {
@@ -133,11 +133,11 @@ export default function ContractorDashboard() {
               <span className="text-gray-600 ml-1">Saved</span>
             </div>
             <div className="bg-green-50 px-4 py-2 rounded-lg">
-              <span className="text-green-600 font-semibold">3</span>
+              <span className="text-green-600 font-semibold">0</span>
               <span className="text-gray-600 ml-1">Active Bids</span>
             </div>
             <div className="bg-purple-50 px-4 py-2 rounded-lg">
-              <span className="text-purple-600 font-semibold">2</span>
+              <span className="text-purple-600 font-semibold">0</span>
               <span className="text-gray-600 ml-1">New Messages</span>
             </div>
           </div>

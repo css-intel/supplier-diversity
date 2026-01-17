@@ -469,24 +469,24 @@ export default function ProcurementDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
-                  <input type="email" defaultValue="john.smith@agency.gov" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                  <input type="email" placeholder="Enter your email" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Agency/Organization</label>
-                  <input type="text" defaultValue="Department of Transportation" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                  <input type="text" placeholder="Enter your agency" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Phone</label>
-                  <input type="tel" defaultValue="(202) 555-0142" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <input type="tel" placeholder="Enter your phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Office Location</label>
-                <input type="text" defaultValue="Washington, DC" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                <input type="text" placeholder="Enter your location" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
               </div>
 
               <button type="submit" className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
