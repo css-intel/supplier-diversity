@@ -26,74 +26,7 @@ export default function EventsPage() {
   const [activeFilter, setActiveFilter] = useState('All Events');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const events: Event[] = [
-    {
-      id: '1',
-      title: 'Supplier Diversity Summit 2026',
-      date: '2026-02-15',
-      time: '9:00 AM - 5:00 PM',
-      location: 'Columbia, SC',
-      type: 'Conference',
-      attendees: 500,
-      description: 'Industry-leading conference for supplier diversity professionals with keynotes, panels, and networking opportunities.',
-      hasSurvey: true,
-      agenda: ['9:00 AM - Registration & Breakfast', '10:00 AM - Opening Keynote', '11:30 AM - Panel: Future of Supplier Diversity', '1:00 PM - Lunch & Networking', '2:30 PM - Breakout Sessions', '4:30 PM - Closing Remarks'],
-      speakers: ['Dr. Sarah Williams, CEO SupplyChain Inc.', 'Marcus Johnson, VP Procurement at Fortune 100', 'Lisa Chen, Director of Diversity Programs']
-    },
-    {
-      id: '2',
-      title: 'Speed Networking: Connect with Fortune 500 Buyers',
-      date: '2026-02-18',
-      time: '6:00 PM - 8:00 PM',
-      location: 'Virtual',
-      type: 'Networking',
-      attendees: 200,
-      description: 'Fast-paced networking event connecting diverse suppliers with procurement executives from leading companies.'
-    },
-    {
-      id: '3',
-      title: 'Government Contracting Power Hour',
-      date: '2026-02-22',
-      time: '2:00 PM - 3:00 PM',
-      location: 'Virtual',
-      type: 'Matchmaking',
-      attendees: 75,
-      description: 'One-on-one matchmaking sessions with government procurement officers. Powered by My Virtual Check-In.',
-      hasSurvey: true,
-      agenda: ['2:00 PM - Platform Overview', '2:10 PM - Matchmaking Sessions Begin', '2:50 PM - Wrap-up & Follow-up Instructions']
-    },
-    {
-      id: '4',
-      title: 'Women Business Owners Roundtable',
-      date: '2026-03-08',
-      time: '10:00 AM - 12:00 PM',
-      location: 'Virtual',
-      type: 'Roundtable',
-      attendees: 120,
-      description: 'Intimate discussion on challenges and opportunities for women-owned businesses in government contracting.'
-    },
-    {
-      id: '5',
-      title: 'Tech Solutions for Procurement: 2026 Trends',
-      date: '2026-03-15',
-      time: '1:00 PM - 3:00 PM',
-      location: 'San Francisco, CA',
-      type: 'Webinar',
-      attendees: 300,
-      description: 'Explore latest technology trends reshaping procurement and supplier management.',
-      hasSurvey: true
-    },
-    {
-      id: '6',
-      title: 'Manufacturing Excellence Summit',
-      date: '2026-03-22',
-      time: '9:00 AM - 4:00 PM',
-      location: 'Detroit, MI',
-      type: 'Conference',
-      attendees: 400,
-      description: 'Deep dive into manufacturing quality, efficiency, and innovation for diverse suppliers.'
-    }
-  ];
+  const events: Event[] = [];
 
   const filterOptions = ['All Events', 'Conference', 'Networking', 'Matchmaking', 'Webinar', 'Roundtable'];
 

@@ -30,7 +30,7 @@ export default function ContractorDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [nacisFilter, setNacisFilter] = useState('');
   const [userName, setUserName] = useState('Sarah Johnson');
-  const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set(['1']));
+  const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set());
   
   // Modal states
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
@@ -70,58 +70,7 @@ export default function ContractorDashboard() {
     router.push('/');
   };
 
-  const opportunities: Opportunity[] = [
-    {
-      id: '1',
-      title: 'IT Infrastructure Modernization',
-      agency: 'Department of Transportation',
-      nacisCodes: ['61110', '54140'],
-      budget: { min: 250000, max: 500000 },
-      estimatedBudget: { min: 250000, max: 500000 },
-      location: 'Washington, DC',
-      submissionDeadline: '2026-02-15',
-      datePosted: '2026-01-10',
-      type: 'procurement',
-      attachments: 3,
-      description: 'The Department of Transportation is seeking qualified vendors to modernize IT infrastructure across multiple regional offices. This includes network upgrades, cloud migration, and cybersecurity enhancements.',
-      requirements: ['Minimum 5 years IT experience', 'Active security clearance', 'Previous federal contract experience preferred', 'Cisco or AWS certifications'],
-      contactEmail: 'procurement@dot.gov',
-      contactName: 'Michael Chen'
-    },
-    {
-      id: '2',
-      title: 'Building Maintenance Services',
-      agency: 'GSA',
-      nacisCodes: ['56210', '56201'],
-      budget: { min: 100000, max: 300000 },
-      estimatedBudget: { min: 100000, max: 300000 },
-      location: 'New York, NY',
-      submissionDeadline: '2026-02-20',
-      datePosted: '2026-01-08',
-      type: 'procurement',
-      attachments: 2,
-      description: 'GSA requires comprehensive building maintenance services for federal facilities in the New York metropolitan area. Services include HVAC, electrical, plumbing, and general repairs.',
-      requirements: ['Licensed in NY State', 'Liability insurance $1M+', 'Experience with commercial facilities', 'Available for emergency calls'],
-      contactEmail: 'maintenance@gsa.gov',
-      contactName: 'Linda Thompson'
-    },
-    {
-      id: '3',
-      title: 'Construction Partner Needed',
-      agency: 'Local Construction Firm',
-      nacisCodes: ['23600', '23620'],
-      estimatedBudget: { min: 150000, max: 400000 },
-      location: 'Chicago, IL',
-      submissionDeadline: '2026-03-01',
-      datePosted: '2026-01-12',
-      type: 'teaming',
-      attachments: 1,
-      description: 'Established construction firm seeking certified DBE/MBE partner for upcoming federal construction project. Looking for complementary capabilities in concrete and steel work.',
-      requirements: ['DBE or MBE certification', 'Bonding capacity $500K+', 'Commercial construction experience', 'Safety certifications current'],
-      contactEmail: 'partnerships@localconstruction.com',
-      contactName: 'James Wilson'
-    }
-  ];
+  const opportunities: Opportunity[] = [];
 
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

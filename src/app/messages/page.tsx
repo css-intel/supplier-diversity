@@ -29,7 +29,7 @@ interface Conversation {
 }
 
 export default function MessagesPage() {
-  const [selectedConversation, setSelectedConversation] = useState(1);
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showConversationList, setShowConversationList] = useState(true);
   const [messageInput, setMessageInput] = useState('');
@@ -44,69 +44,7 @@ export default function MessagesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const [conversations, setConversations] = useState<Conversation[]>([
-    {
-      id: 1,
-      name: 'Department of Transportation',
-      org: 'DOT',
-      lastMessage: 'Thanks for submitting your proposal',
-      time: '2 hours ago',
-      unread: 2,
-      online: true,
-      avatar: 'DOT',
-      messages: [
-        { id: 1, sender: 'DOT', text: 'Thank you for your submission on the IT Infrastructure project', time: '2:15 PM' },
-        { id: 2, sender: 'You', text: 'You\'re welcome! I\'m very interested in this opportunity', time: '2:30 PM' },
-        { id: 3, sender: 'DOT', text: 'We are currently reviewing all proposals and will get back to you within 2 weeks.', time: '2:45 PM' },
-        { id: 4, sender: 'DOT', text: 'Thanks for submitting your proposal', time: '3:00 PM' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'John Smith - ABC Contractors',
-      org: 'ABC Contractors',
-      lastMessage: 'Would you be interested in teaming?',
-      time: '5 hours ago',
-      unread: 1,
-      online: true,
-      avatar: 'JS',
-      messages: [
-        { id: 1, sender: 'John Smith', text: 'I saw your profile and think we could work together', time: '10:00 AM' },
-        { id: 2, sender: 'You', text: 'That sounds great! What did you have in mind?', time: '10:15 AM' },
-        { id: 3, sender: 'John Smith', text: 'Would you be interested in teaming on the GSA IT modernization contract?', time: '10:30 AM' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'GSA Procurement Office',
-      org: 'GSA',
-      lastMessage: 'Your proposal has been accepted!',
-      time: '1 day ago',
-      unread: 0,
-      online: false,
-      avatar: 'GSA',
-      messages: [
-        { id: 1, sender: 'GSA', text: 'We received your proposal for building maintenance services', time: '9:00 AM' },
-        { id: 2, sender: 'You', text: 'Thank you for confirming. When can I expect a decision?', time: '9:30 AM' },
-        { id: 3, sender: 'GSA', text: 'Your proposal has been accepted! Please check your email for next steps.', time: '2:00 PM' }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Maria Garcia - TechSolutions',
-      org: 'TechSolutions LLC',
-      lastMessage: 'Let me send you our capability statement',
-      time: '2 days ago',
-      unread: 0,
-      online: true,
-      avatar: 'MG',
-      messages: [
-        { id: 1, sender: 'Maria', text: 'Hi! I noticed you have 8(a) certification. We are looking for teaming partners.', time: '3:00 PM' },
-        { id: 2, sender: 'You', text: 'Yes, we do! What type of work are you pursuing?', time: '3:15 PM' },
-        { id: 3, sender: 'Maria', text: 'Let me send you our capability statement', time: '3:30 PM', attachment: { name: 'TechSolutions_CapStatement.pdf', type: 'document', url: '#' } }
-      ]
-    }
-  ]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   const current = conversations.find(c => c.id === selectedConversation);
 

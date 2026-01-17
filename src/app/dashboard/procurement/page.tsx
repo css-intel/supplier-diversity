@@ -83,48 +83,9 @@ export default function ProcurementDashboard() {
     router.push('/');
   };
 
-  const [postedOpportunities, setPostedOpportunities] = useState<OpportunityPosted[]>([
-    {
-      id: '1',
-      title: 'IT Infrastructure Modernization',
-      nacisCodes: ['61110', '54140'],
-      location: 'Washington, DC',
-      status: 'open',
-      submissionDeadline: '2026-02-15',
-      type: 'procurement',
-      description: 'Modernize IT infrastructure across regional offices.',
-      budgetMin: 250000,
-      budgetMax: 500000,
-      bids: [
-        { id: 'b1', companyName: 'TechSolutions LLC', contactName: 'Maria Garcia', email: 'maria@techsolutions.com', amount: 375000, submittedDate: '2026-01-12', summary: 'Comprehensive IT modernization plan with cloud migration...', certifications: ['8(a)', 'WBE'] },
-        { id: 'b2', companyName: 'Digital First Inc', contactName: 'James Wilson', email: 'james@digitalfirst.com', amount: 425000, submittedDate: '2026-01-13', summary: 'End-to-end infrastructure upgrade with security focus...', certifications: ['HUBZone', 'MBE'] },
-        { id: 'b3', companyName: 'CloudServe Corp', contactName: 'Emily Chen', email: 'emily@cloudserve.com', amount: 290000, submittedDate: '2026-01-14', summary: 'Cost-effective modernization leveraging existing systems...', certifications: ['DBE'] }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Building Maintenance Services',
-      nacisCodes: ['56210', '56201'],
-      location: 'New York, NY',
-      status: 'open',
-      submissionDeadline: '2026-02-20',
-      type: 'procurement',
-      description: 'Comprehensive building maintenance for federal facilities.',
-      budgetMin: 100000,
-      budgetMax: 300000,
-      bids: [
-        { id: 'b4', companyName: 'FacilityCare Services', contactName: 'Robert Brown', email: 'robert@facilitycare.com', amount: 185000, submittedDate: '2026-01-10', summary: 'Full-service maintenance with 24/7 emergency response...', certifications: ['MBE', 'DBE'] },
-        { id: 'b5', companyName: 'BuildRight Maintenance', contactName: 'Sarah Johnson', email: 'sarah@buildright.com', amount: 210000, submittedDate: '2026-01-11', summary: 'Experienced team with federal facility expertise...', certifications: ['WBE'] }
-      ]
-    }
-  ]);
+  const [postedOpportunities, setPostedOpportunities] = useState<OpportunityPosted[]>([]);
 
-  const contractors: Contractor[] = [
-    { id: 'c1', name: 'Maria Garcia', company: 'TechSolutions LLC', nacisCodes: ['61110', '54140'], location: 'Washington, DC', certifications: ['8(a)', 'WBE'], rating: 4.8, email: 'maria@techsolutions.com', description: 'Full-service IT consulting firm specializing in federal contracts.' },
-    { id: 'c2', name: 'James Wilson', company: 'Digital First Inc', nacisCodes: ['61110', '54151'], location: 'Chicago, IL', certifications: ['HUBZone', 'MBE'], rating: 4.6, email: 'james@digitalfirst.com', description: 'Digital transformation and software development services.' },
-    { id: 'c3', name: 'Emily Chen', company: 'CloudServe Corp', nacisCodes: ['54140', '51821'], location: 'San Francisco, CA', certifications: ['DBE'], rating: 4.9, email: 'emily@cloudserve.com', description: 'Cloud infrastructure and managed services provider.' },
-    { id: 'c4', name: 'Robert Brown', company: 'FacilityCare Services', nacisCodes: ['56210', '56201'], location: 'New York, NY', certifications: ['MBE', 'DBE'], rating: 4.5, email: 'robert@facilitycare.com', description: 'Commercial and federal facility maintenance services.' }
-  ];
+  const contractors: Contractor[] = [];
 
   const filteredContractors = contractors.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
