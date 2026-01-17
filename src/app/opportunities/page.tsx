@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { MapPin, DollarSign, Clock, Menu, X, Star, Bookmark, Calendar, Filter, Eye, FileText, Paperclip, Send, MessageSquare, CheckCircle, Upload } from 'lucide-react';
+import { MapPin, DollarSign, Clock, X, Star, Bookmark, Calendar, Filter, Eye, FileText, Paperclip, Send, MessageSquare, CheckCircle, Upload } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 interface Opportunity {
   id: number;
@@ -24,7 +25,6 @@ interface Opportunity {
 
 export default function OpportunitiesPage() {
   const [activeTab, setActiveTab] = useState('browse');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<'all' | 'procurement' | 'teaming'>('all');
   const [savedOpportunities, setSavedOpportunities] = useState<number[]>([]);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
@@ -114,21 +114,7 @@ export default function OpportunitiesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2">
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <Link href="/contractors" className="text-gray-700 hover:text-blue-600 font-medium">Contractors</Link>
-            <Link href="/opportunities" className="text-blue-600 hover:text-blue-700 font-medium">Opportunities</Link>
-            <Link href="/messages" className="text-gray-700 hover:text-blue-600 font-medium">Messages</Link>
-            <Link href="/events" className="text-gray-700 hover:text-blue-600 font-medium">Events</Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation activeItem="opportunities" />
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">

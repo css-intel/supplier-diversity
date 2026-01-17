@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Menu, X, Plus, Filter, LogOut, Star, Bookmark, Paperclip, CheckCircle, Download, Send, MapPin, DollarSign, Clock } from 'lucide-react';
+import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Plus, Filter, Star, Bookmark, Paperclip, CheckCircle, Download, Send, MapPin, DollarSign, Clock, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import DashboardNavigation from '@/components/DashboardNavigation';
 
 interface Opportunity {
   id: string;
@@ -25,11 +26,10 @@ interface Opportunity {
 
 export default function ContractorDashboard() {
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'opportunities' | 'profile' | 'alerts' | 'messages'>('opportunities');
   const [searchQuery, setSearchQuery] = useState('');
   const [nacisFilter, setNacisFilter] = useState('');
-  const [userName, setUserName] = useState('Sarah Johnson');
+  const [userName, setUserName] = useState('');
   const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set());
   
   // Modal states
@@ -63,11 +63,6 @@ export default function ContractorDashboard() {
       }
       return newSet;
     });
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('userAuth');
-    router.push('/');
   };
 
   const opportunities: Opportunity[] = [];
@@ -119,28 +114,12 @@ export default function ContractorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <button onClick={() => {setActiveTab('opportunities'); setMobileMenuOpen(false);}} className={`font-medium text-left ${activeTab === 'opportunities' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Opportunities</button>
-            <button onClick={() => {setActiveTab('profile'); setMobileMenuOpen(false);}} className={`font-medium text-left ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>My Profile</button>
-            <button onClick={() => {setActiveTab('alerts'); setMobileMenuOpen(false);}} className={`font-medium text-left ${activeTab === 'alerts' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Alerts</button>
-            <Link href="/messages" className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</Link>
-            <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      <DashboardNavigation 
+        userName={userName}
+        dashboardType="contractor"
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab as 'opportunities' | 'profile' | 'alerts' | 'messages')}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-8 px-4">

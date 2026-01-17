@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Send, Clock, Menu, X, Search, Video, Paperclip, MoreVertical, Phone, CheckCircle, Image, FileText, Download, Mic, MicOff, VideoOff, PhoneOff } from 'lucide-react';
+import { Send, Clock, X, Search, Video, Paperclip, MoreVertical, Phone, CheckCircle, Image, FileText, Download, Mic, MicOff, VideoOff, PhoneOff } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import Navigation from '@/components/Navigation';
 
 interface Message {
   id: number;
@@ -30,7 +31,6 @@ interface Conversation {
 
 export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showConversationList, setShowConversationList] = useState(true);
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -149,24 +149,7 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <Link href="/contractors" className="text-gray-700 hover:text-blue-600 font-medium">Contractors</Link>
-            <Link href="/opportunities" className="text-gray-700 hover:text-blue-600 font-medium">Opportunities</Link>
-            <Link href="/messages" className="text-blue-600 hover:text-blue-700 font-medium">Messages</Link>
-            <Link href="/events" className="text-gray-700 hover:text-blue-600 font-medium">Events</Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation activeItem="messages" />
 
       <div className="max-w-7xl mx-auto px-0 md:px-4 py-4 md:py-8 h-[calc(100vh-80px)]">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8 px-4 md:px-0">Messages</h1>

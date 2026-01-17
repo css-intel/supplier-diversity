@@ -2,7 +2,8 @@
 
 import NextLink from 'next/link';
 import { useState } from 'react';
-import { Search, MapPin, Star, Briefcase, Menu, X, FileText, Award, CheckCircle, MessageSquare, Phone, Mail, Building, Calendar, Download } from 'lucide-react';
+import { Search, MapPin, Star, Briefcase, FileText, Award, CheckCircle, MessageSquare, Phone, Mail, Building, Calendar, Download, X } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 interface Contractor {
   id: number;
@@ -27,7 +28,6 @@ export default function ContractorsPage() {
   const [naceCode, setNaceCode] = useState('');
   const [location, setLocation] = useState('');
   const [minRating, setMinRating] = useState('all');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [certFilter, setCertFilter] = useState('all');
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -65,21 +65,7 @@ export default function ContractorsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <NextLink href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</NextLink>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2">
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <NextLink href="/contractors" className="text-blue-600 hover:text-blue-700 font-medium">Contractors</NextLink>
-            <NextLink href="/opportunities" className="text-gray-700 hover:text-blue-600 font-medium">Opportunities</NextLink>
-            <NextLink href="/messages" className="text-gray-700 hover:text-blue-600 font-medium">Messages</NextLink>
-            <NextLink href="/events" className="text-gray-700 hover:text-blue-600 font-medium">Events</NextLink>
-          </div>
-        </div>
-      </nav>
+      <Navigation activeItem="contractors" />
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         <div className="mb-6 md:mb-8">

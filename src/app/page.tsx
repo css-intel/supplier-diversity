@@ -1,36 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Briefcase, Users, MessageSquare, Bell, ArrowRight, CheckCircle, Menu, X, Star, Award, Handshake, Video, CalendarDays } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Briefcase, Users, MessageSquare, Bell, ArrowRight, CheckCircle, Star, Award, Handshake, Video, CalendarDays } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 export default function Home() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Mobile Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-lg md:text-2xl font-bold text-blue-600 flex-shrink-0">FedMatch</Link>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 flex-shrink-0 ml-2"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-full left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-2 md:gap-8 p-4 md:p-0 border-t md:border-t-0 border-gray-200 md:border-0`}>
-            <Link href="/contractors" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0 text-sm md:text-base">Contractors</Link>
-            <Link href="/opportunities" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0 text-sm md:text-base">Opportunities</Link>
-            <Link href="/messages" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0 text-sm md:text-base">Messages</Link>
-            <Link href="/events" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0 text-sm md:text-base">Events</Link>
-            <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0 text-sm md:text-base">Login</Link>
-            <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 md:py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-center w-full md:w-auto text-sm md:text-base active:bg-blue-800">Sign Up</Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section - Mobile Optimized */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 md:py-20 px-4">

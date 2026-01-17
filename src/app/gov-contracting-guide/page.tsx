@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Menu, X, BookOpen, Users, Award, Target } from 'lucide-react';
+import { ChevronDown, ChevronUp, BookOpen, Users, Award, Target } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 export default function GovContractingGuidePage() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const guides = [
     {
@@ -38,26 +38,7 @@ export default function GovContractingGuidePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium">Home</Link>
-            <Link href="/faq" className="text-gray-700 hover:text-blue-600 font-medium">FAQ</Link>
-            <Link href="/gov-contracting-guide" className="text-gray-700 hover:text-blue-600 font-medium">Guide</Link>
-            <Link href="/auth/login" className="text-gray-700 hover:text-blue-600 font-medium">Login</Link>
-            <Link href="/auth/signup" className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-center">Sign Up</Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation activeItem="guide" />
 
       {/* Header */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 md:py-16 px-4">

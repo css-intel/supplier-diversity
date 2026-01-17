@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, Plus, Menu, X, Filter, Briefcase, Users, MessageSquare, Trash2, LogOut, CheckCircle, Edit, Eye, Star, MapPin, Send, Paperclip, Download } from 'lucide-react';
+import { Search, Plus, Filter, Briefcase, Users, MessageSquare, Trash2, CheckCircle, Edit, Eye, Star, MapPin, Send, Paperclip, Download, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import DashboardNavigation from '@/components/DashboardNavigation';
 
 interface Bid {
   id: string;
@@ -44,10 +45,9 @@ interface Contractor {
 
 export default function ProcurementDashboard() {
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'opportunities' | 'post' | 'profile' | 'contractors' | 'messages'>('opportunities');
   const [showPostForm, setShowPostForm] = useState(false);
-  const [userName, setUserName] = useState('John Smith');
+  const [userName, setUserName] = useState('');
   
   // Modal states
   const [showBidsModal, setShowBidsModal] = useState(false);
@@ -77,11 +77,6 @@ export default function ProcurementDashboard() {
     deadline: '',
     description: ''
   });
-
-  const handleLogout = () => {
-    localStorage.removeItem('userAuth');
-    router.push('/');
-  };
 
   const [postedOpportunities, setPostedOpportunities] = useState<OpportunityPosted[]>([]);
 
@@ -184,30 +179,19 @@ export default function ProcurementDashboard() {
     setTimeout(() => setProfileSaved(false), 3000);
   };
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as 'opportunities' | 'profile' | 'contractors');
+    setShowPostForm(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8`}>
-            <button onClick={() => { setActiveTab('opportunities'); setShowPostForm(false); setMobileMenuOpen(false); }} className={`font-medium text-left ${activeTab === 'opportunities' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>My Opportunities</button>
-            <button onClick={() => { setActiveTab('profile'); setShowPostForm(false); setMobileMenuOpen(false); }} className={`font-medium text-left ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>My Profile</button>
-            <button onClick={() => { setActiveTab('contractors'); setShowPostForm(false); setMobileMenuOpen(false); }} className={`font-medium text-left ${activeTab === 'contractors' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Find Contractors</button>
-            <Link href="/messages" className="text-gray-700 hover:text-blue-600 font-medium text-left">Messages</Link>
-            <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2 text-left">
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      <DashboardNavigation 
+        userName={userName}
+        dashboardType="procurement"
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-8 px-4">
