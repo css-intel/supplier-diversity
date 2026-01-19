@@ -1,16 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Search, Briefcase, Users, MessageSquare, Calendar, Bell, Plus, Filter, Star, Bookmark, Paperclip, CheckCircle, Download, Send, MapPin, DollarSign, Clock, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Briefcase, MessageSquare, Bell, Filter, Star, Paperclip, CheckCircle, Send, MapPin, DollarSign, Clock, X, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DashboardNavigation from '@/components/DashboardNavigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { useOpportunities, useSavedOpportunities } from '@/lib/hooks/useOpportunities';
+import { useBids } from '@/lib/hooks/useBids';
 
 interface Opportunity {
   id: string;
   title: string;
   agency: string;
-  nacisCodes: string[];
+  naicsCodes: string[];
   budget?: { min: number; max: number };
   estimatedBudget?: { min: number; max: number };
   location: string;
@@ -26,11 +29,47 @@ interface Opportunity {
 
 export default function ContractorDashboard() {
   const router = useRouter();
+  const { user, profile, contractorProfile, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'opportunities' | 'profile' | 'alerts' | 'messages'>('opportunities');
   const [searchQuery, setSearchQuery] = useState('');
-  const [nacisFilter, setNacisFilter] = useState('');
-  const [userName, setUserName] = useState('');
-  const [savedOpportunities, setSavedOpportunities] = useState<Set<string>>(new Set());
+  const [naicsFilter, setNaicsFilter] = useState('');
+  
+  // Fetch opportunities from database
+  const { opportunities: dbOpportunities, loading: oppsLoading } = useOpportunities({
+    status: 'open',
+    searchQuery,
+    naicsCodes: naicsFilter ? [naicsFilter] : undefined,
+  });
+  
+  // Saved opportunities
+  const { savedIds, toggleSave, isSaved } = useSavedOpportunities(user?.id);
+  
+  // Bids by this contractor
+  const { bids } = useBids(undefined, user?.id);
+  
+  // Transform database opportunities to component format
+  const opportunities: Opportunity[] = dbOpportunities.map(opp => ({
+    id: opp.id,
+    title: opp.title,
+    agency: opp.poster?.company_name || 'Unknown Agency',
+    naicsCodes: opp.naics_codes || [],
+    budget: opp.budget_min && opp.budget_max ? { min: opp.budget_min, max: opp.budget_max } : undefined,
+    location: opp.location,
+    submissionDeadline: opp.submission_deadline,
+    datePosted: opp.created_at,
+    type: opp.type as 'procurement' | 'teaming',
+    attachments: opp.attachments_count || 0,
+    description: opp.description,
+    requirements: opp.requirements || [],
+    contactEmail: opp.contact_email || '',
+    contactName: opp.contact_name || '',
+  }));
+  
+  // Loading state
+  const isLoading = authLoading || oppsLoading;
+  
+  // User display name - company_name is on profile, not contractorProfile
+  const userName = profile?.company_name || profile?.full_name || user?.email?.split('@')[0] || 'Contractor';
   
   // Modal states
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
@@ -42,36 +81,52 @@ export default function ContractorDashboard() {
   const [bidSubmitted, setBidSubmitted] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   
-  // Profile form state
+  // Profile form state - prefill with existing data
   const [profileData, setProfileData] = useState({
-    companyName: '',
-    email: '',
-    nacisCodes: '',
-    serviceAreas: '',
-    description: '',
-    openTo: { teaming: false, jv: false, subcontracting: false },
+    companyName: profile?.company_name || '',
+    email: user?.email || '',
+    naicsCodes: contractorProfile?.naics_codes?.join(', ') || '',
+    serviceAreas: contractorProfile?.service_areas?.join(', ') || '',
+    description: profile?.description || '',
+    openTo: { 
+      teaming: contractorProfile?.open_to_teaming || false, 
+      jv: contractorProfile?.open_to_jv || false, 
+      subcontracting: contractorProfile?.open_to_subcontracting || false 
+    },
     certifications: { dbe: false, hubzone: false, eighta: false, mbe: false, wbe: false }
   });
-
-  const toggleSaved = (id: string) => {
-    setSavedOpportunities(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
-
-  const opportunities: Opportunity[] = [];
+  
+  // Update profile data when profile loads
+  useEffect(() => {
+    if (profile || contractorProfile) {
+      const certs = contractorProfile?.certifications || [];
+      setProfileData({
+        companyName: profile?.company_name || '',
+        email: user?.email || '',
+        naicsCodes: contractorProfile?.naics_codes?.join(', ') || '',
+        serviceAreas: contractorProfile?.service_areas?.join(', ') || '',
+        description: profile?.description || '',
+        openTo: { 
+          teaming: contractorProfile?.open_to_teaming || false, 
+          jv: contractorProfile?.open_to_jv || false, 
+          subcontracting: contractorProfile?.open_to_subcontracting || false 
+        },
+        certifications: { 
+          dbe: certs.includes('DBE'), 
+          hubzone: certs.includes('HUBZone'), 
+          eighta: certs.includes('8(a)'), 
+          mbe: certs.includes('MBE'), 
+          wbe: certs.includes('WBE') 
+        }
+      });
+    }
+  }, [profile, contractorProfile, user?.email]);
 
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          opp.agency.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesNacis = nacisFilter ? opp.nacisCodes.some(code => code.includes(nacisFilter)) : true;
-    return matchesSearch && matchesNacis;
+    const matchesNaics = naicsFilter ? opp.naicsCodes.some((code: string) => code.includes(naicsFilter)) : true;
+    return matchesSearch && matchesNaics;
   });
 
   const handleViewDetails = (opp: Opportunity) => {
@@ -129,11 +184,11 @@ export default function ContractorDashboard() {
           <p className="text-gray-600">Manage your profile, find opportunities, and grow your business</p>
           <div className="flex gap-4 mt-4 flex-wrap">
             <div className="bg-blue-50 px-4 py-2 rounded-lg">
-              <span className="text-blue-600 font-semibold">{savedOpportunities.size}</span>
+              <span className="text-blue-600 font-semibold">{savedIds.size}</span>
               <span className="text-gray-600 ml-1">Saved</span>
             </div>
             <div className="bg-green-50 px-4 py-2 rounded-lg">
-              <span className="text-green-600 font-semibold">0</span>
+              <span className="text-green-600 font-semibold">{bids.filter(b => b.status === 'pending').length}</span>
               <span className="text-gray-600 ml-1">Active Bids</span>
             </div>
             <div className="bg-purple-50 px-4 py-2 rounded-lg">
@@ -166,8 +221,8 @@ export default function ContractorDashboard() {
                     <input
                       type="text"
                       placeholder="Filter by NAICS code..."
-                      value={nacisFilter}
-                      onChange={(e) => setNacisFilter(e.target.value)}
+                      value={naicsFilter}
+                      onChange={(e) => setNaicsFilter(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -188,11 +243,11 @@ export default function ContractorDashboard() {
                       </div>
                       <div className="flex items-center gap-2">
                         <button 
-                          onClick={() => toggleSaved(opp.id)}
-                          className={`p-2 rounded-full ${savedOpportunities.has(opp.id) ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={savedOpportunities.has(opp.id) ? 'Saved' : 'Save for later'}
+                          onClick={() => toggleSave(opp.id)}
+                          className={`p-2 rounded-full ${isSaved(opp.id) ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={isSaved(opp.id) ? 'Saved' : 'Save for later'}
                         >
-                          <Star size={18} fill={savedOpportunities.has(opp.id) ? 'currentColor' : 'none'} />
+                          <Star size={18} fill={isSaved(opp.id) ? 'currentColor' : 'none'} />
                         </button>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${opp.type === 'teaming' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                           {opp.type === 'teaming' ? 'Teaming' : 'Procurement'}
@@ -204,7 +259,7 @@ export default function ContractorDashboard() {
                       <div>
                         <span className="text-gray-600">NAICS Codes: </span>
                         <div className="flex gap-2 flex-wrap mt-1">
-                          {opp.nacisCodes.map((code, idx) => (
+                          {opp.naicsCodes.map((code: string, idx: number) => (
                             <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                               {code}
                             </span>
@@ -294,8 +349,8 @@ export default function ContractorDashboard() {
                 <label className="block text-sm font-semibold text-gray-900 mb-2">NAICS Codes (comma-separated)</label>
                 <input 
                   type="text" 
-                  value={profileData.nacisCodes}
-                  onChange={(e) => setProfileData({...profileData, nacisCodes: e.target.value})}
+                  value={profileData.naicsCodes}
+                  onChange={(e) => setProfileData({...profileData, naicsCodes: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
                 />
               </div>
@@ -503,7 +558,7 @@ export default function ContractorDashboard() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">NAICS Codes</h3>
                 <div className="flex gap-2 flex-wrap">
-                  {selectedOpportunity.nacisCodes.map((code, idx) => (
+                  {selectedOpportunity.naicsCodes.map((code: string, idx: number) => (
                     <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
                       {code}
                     </span>
@@ -542,12 +597,12 @@ export default function ContractorDashboard() {
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button 
                 onClick={() => {
-                  toggleSaved(selectedOpportunity.id);
+                  toggleSave(selectedOpportunity.id);
                 }}
-                className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${savedOpportunities.has(selectedOpportunity.id) ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${isSaved(selectedOpportunity.id) ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
-                <Star size={18} fill={savedOpportunities.has(selectedOpportunity.id) ? 'currentColor' : 'none'} />
-                {savedOpportunities.has(selectedOpportunity.id) ? 'Saved' : 'Save'}
+                <Star size={18} fill={isSaved(selectedOpportunity.id) ? 'currentColor' : 'none'} />
+                {isSaved(selectedOpportunity.id) ? 'Saved' : 'Save'}
               </button>
               <button 
                 onClick={() => {

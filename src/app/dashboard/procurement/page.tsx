@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Filter, Briefcase, Users, MessageSquare, Trash2, CheckCircle, Edit, Eye, Star, MapPin, Send, Paperclip, Download, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DashboardNavigation from '@/components/DashboardNavigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { useOpportunities } from '@/lib/hooks/useOpportunities';
+import { useContractors } from '@/lib/hooks/useContractors';
 
 interface Bid {
   id: string;
@@ -20,7 +23,7 @@ interface Bid {
 interface OpportunityPosted {
   id: string;
   title: string;
-  nacisCodes: string[];
+  naicsCodes: string[];
   location: string;
   status: 'open' | 'closed';
   submissionDeadline: string;
@@ -35,7 +38,7 @@ interface Contractor {
   id: string;
   name: string;
   company: string;
-  nacisCodes: string[];
+  naicsCodes: string[];
   location: string;
   certifications: string[];
   rating: number;
@@ -45,9 +48,20 @@ interface Contractor {
 
 export default function ProcurementDashboard() {
   const router = useRouter();
+  const { user, profile, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'opportunities' | 'post' | 'profile' | 'contractors' | 'messages'>('opportunities');
   const [showPostForm, setShowPostForm] = useState(false);
-  const [userName, setUserName] = useState('');
+  
+  // User display name
+  const userName = profile?.company_name || profile?.full_name || user?.email?.split('@')[0] || 'Procurement Officer';
+  
+  // Fetch opportunities posted by this user
+  const { opportunities: dbOpportunities, loading: oppsLoading, createOpportunity } = useOpportunities({
+    postedBy: user?.id,
+  });
+  
+  // Fetch contractors for search
+  const { contractors: dbContractors, loading: contractorsLoading } = useContractors();
   
   // Modal states
   const [showBidsModal, setShowBidsModal] = useState(false);
@@ -65,12 +79,12 @@ export default function ProcurementDashboard() {
   const [messageSent, setMessageSent] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [nacisFilter, setNacisFilter] = useState('');
+  const [naicsFilter, setNaicsFilter] = useState('');
   
   // Edit form state
   const [editFormData, setEditFormData] = useState({
     title: '',
-    nacisCodes: '',
+    naicsCodes: '',
     location: '',
     budgetMin: '',
     budgetMax: '',
@@ -78,16 +92,40 @@ export default function ProcurementDashboard() {
     description: ''
   });
 
-  const [postedOpportunities, setPostedOpportunities] = useState<OpportunityPosted[]>([]);
-
-  const contractors: Contractor[] = [];
+  // Transform database opportunities to component format
+  const postedOpportunities: OpportunityPosted[] = dbOpportunities.map(opp => ({
+    id: opp.id,
+    title: opp.title,
+    naicsCodes: opp.naics_codes || [],
+    location: opp.location,
+    status: opp.status === 'open' ? 'open' : 'closed',
+    submissionDeadline: opp.submission_deadline,
+    bids: [], // Bids are fetched separately
+    description: opp.description,
+    budgetMin: opp.budget_min || undefined,
+    budgetMax: opp.budget_max || undefined,
+    type: opp.type as 'procurement' | 'teaming',
+  }));
+  
+  // Transform contractors to component format
+  const contractors: Contractor[] = dbContractors.map(c => ({
+    id: c.id,
+    name: c.full_name || 'Unknown',
+    company: c.company_name || 'Unknown Company',
+    naicsCodes: c.contractor_profile?.naics_codes || [],
+    location: c.location || 'Unknown',
+    certifications: c.contractor_profile?.certifications || [],
+    rating: c.contractor_profile?.rating || 0,
+    email: c.email || '',
+    description: c.description || '',
+  }));
 
   const filteredContractors = contractors.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          c.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          c.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesNacis = nacisFilter ? c.nacisCodes.some(code => code.includes(nacisFilter)) : true;
-    return matchesSearch && matchesNacis;
+    const matchesNaics = naicsFilter ? c.naicsCodes.some((code: string) => code.includes(naicsFilter)) : true;
+    return matchesSearch && matchesNaics;
   });
 
   const handlePostOpportunity = (e: React.FormEvent) => {
@@ -108,7 +146,7 @@ export default function ProcurementDashboard() {
     setSelectedOpportunity(opp);
     setEditFormData({
       title: opp.title,
-      nacisCodes: opp.nacisCodes.join(', '),
+      naicsCodes: opp.naicsCodes.join(', '),
       location: opp.location,
       budgetMin: opp.budgetMin?.toString() || '',
       budgetMax: opp.budgetMax?.toString() || '',
@@ -118,22 +156,11 @@ export default function ProcurementDashboard() {
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // TODO: Integrate with updateOpportunity hook
     if (selectedOpportunity) {
-      setPostedOpportunities(prev => prev.map(opp => 
-        opp.id === selectedOpportunity.id 
-          ? { ...opp, 
-              title: editFormData.title,
-              nacisCodes: editFormData.nacisCodes.split(',').map(c => c.trim()),
-              location: editFormData.location,
-              budgetMin: editFormData.budgetMin ? parseInt(editFormData.budgetMin) : undefined,
-              budgetMax: editFormData.budgetMax ? parseInt(editFormData.budgetMax) : undefined,
-              submissionDeadline: editFormData.deadline,
-              description: editFormData.description
-            }
-          : opp
-      ));
+      // For now just close the modal - actual update will be via Supabase
       setShowEditModal(false);
       setSelectedOpportunity(null);
     }
@@ -144,9 +171,10 @@ export default function ProcurementDashboard() {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
+    // TODO: Integrate with deleteOpportunity hook
     if (selectedOpportunity) {
-      setPostedOpportunities(prev => prev.filter(opp => opp.id !== selectedOpportunity.id));
+      // For now just close the modal - actual delete will be via Supabase
       setShowDeleteConfirm(false);
       setSelectedOpportunity(null);
     }
@@ -308,7 +336,7 @@ export default function ProcurementDashboard() {
                           <h3 className="text-lg font-bold text-gray-900">{opp.title}</h3>
                           <div className="flex flex-col gap-2 mt-2">
                             <div className="flex gap-2 flex-wrap">
-                              {opp.nacisCodes.map((code, idx) => (
+                              {opp.naicsCodes.map((code, idx) => (
                                 <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                                   {code}
                                 </span>
@@ -392,8 +420,8 @@ export default function ProcurementDashboard() {
                   <input
                     type="text"
                     placeholder="Filter by NAICS code..."
-                    value={nacisFilter}
-                    onChange={(e) => setNacisFilter(e.target.value)}
+                    value={naicsFilter}
+                    onChange={(e) => setNaicsFilter(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -425,7 +453,7 @@ export default function ProcurementDashboard() {
                     ))}
                   </div>
                   <div className="flex gap-2 flex-wrap mb-3">
-                    {contractor.nacisCodes.map((code, idx) => (
+                    {contractor.naicsCodes.map((code, idx) => (
                       <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                         {code}
                       </span>
@@ -550,7 +578,7 @@ export default function ProcurementDashboard() {
                     </button>
                     <button 
                       onClick={() => {
-                        setSelectedContractor({ id: bid.id, name: bid.contactName, company: bid.companyName, nacisCodes: [], location: '', certifications: bid.certifications, rating: 0, email: bid.email, description: '' });
+                        setSelectedContractor({ id: bid.id, name: bid.contactName, company: bid.companyName, naicsCodes: [], location: '', certifications: bid.certifications, rating: 0, email: bid.email, description: '' });
                         setShowMessageModal(true);
                       }}
                       className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300"
@@ -609,8 +637,8 @@ export default function ProcurementDashboard() {
                 <label className="block text-sm font-semibold text-gray-900 mb-2">NAICS Codes</label>
                 <input
                   type="text"
-                  value={editFormData.nacisCodes}
-                  onChange={(e) => setEditFormData({...editFormData, nacisCodes: e.target.value})}
+                  value={editFormData.naicsCodes}
+                  onChange={(e) => setEditFormData({...editFormData, naicsCodes: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -745,7 +773,7 @@ export default function ProcurementDashboard() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">NAICS Codes</h3>
                 <div className="flex gap-2 flex-wrap">
-                  {selectedContractor.nacisCodes.map((code, idx) => (
+                  {selectedContractor.naicsCodes.map((code, idx) => (
                     <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
                       {code}
                     </span>

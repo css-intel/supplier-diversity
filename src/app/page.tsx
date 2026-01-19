@@ -46,15 +46,15 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mt-8 md:mt-12">
             <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg">
-              <div className="text-2xl md:text-4xl font-bold text-blue-600">5,000+</div>
+              <div className="text-2xl md:text-4xl font-bold text-blue-600">0</div>
               <p className="text-gray-800 font-semibold mt-1 md:mt-2 text-sm md:text-base">Verified Contractors</p>
             </div>
             <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg">
-              <div className="text-2xl md:text-4xl font-bold text-blue-600">1,200+</div>
+              <div className="text-2xl md:text-4xl font-bold text-blue-600">0</div>
               <p className="text-gray-800 font-semibold mt-1 md:mt-2 text-sm md:text-base">Procurement Officers</p>
             </div>
             <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg">
-              <div className="text-2xl md:text-4xl font-bold text-blue-600">3,500+</div>
+              <div className="text-2xl md:text-4xl font-bold text-blue-600">0</div>
               <p className="text-gray-800 font-semibold mt-1 md:mt-2 text-sm md:text-base">Active Opportunities</p>
             </div>
           </div>

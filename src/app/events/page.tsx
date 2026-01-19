@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Calendar, MapPin, Users, ArrowRight, ClipboardList, Sparkles, X, CheckCircle, Search } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { useEvents, useEventRegistration } from '@/lib/hooks/useEvents';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface Event {
   id: string;
@@ -13,6 +15,7 @@ interface Event {
   location: string;
   type: string;
   attendees: number;
+  maxAttendees?: number;
   description: string;
   image?: string;
   hasSurvey?: boolean;
@@ -21,13 +24,32 @@ interface Event {
 }
 
 export default function EventsPage() {
+  const { user } = useAuth();
+  const [activeFilter, setActiveFilter] = useState('All Events');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const { events: dbEvents, loading } = useEvents({ type: activeFilter, searchQuery });
+  const { register: registerForEvent, isRegistered } = useEventRegistration(user?.id);
+  
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [registered, setRegistered] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('All Events');
-  const [searchQuery, setSearchQuery] = useState('');
 
-  const events: Event[] = [];
+  // Transform database events to component format
+  const events: Event[] = dbEvents.map(e => ({
+    id: e.id,
+    title: e.title,
+    date: e.date,
+    time: e.time,
+    location: e.location,
+    type: e.type,
+    attendees: e.attendees_count || 0,
+    maxAttendees: e.max_attendees || undefined,
+    description: e.description,
+    hasSurvey: e.has_survey || false,
+    agenda: e.agenda || [],
+    speakers: e.speakers || [],
+  }));
 
   const filterOptions = ['All Events', 'Conference', 'Networking', 'Matchmaking', 'Webinar', 'Roundtable'];
 

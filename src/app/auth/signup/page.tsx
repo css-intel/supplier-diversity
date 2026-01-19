@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { useState, Suspense } from 'react';
 import { User, Mail, Lock, Building2, ArrowRight, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { signupSchema } from '@/lib/validations/schemas';
 
 function SignupContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { signUp } = useAuth();
   const type = searchParams.get('type') === 'contractor' ? 'contractor' : 'procurement';
   
   const [formData, setFormData] = useState({
@@ -26,32 +29,25 @@ function SignupContent() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const validateForm = () => {
-    if (!formData.fullName.trim()) {
-      setError('Full name is required');
+  const validateForm = (): boolean => {
+    setFieldErrors({});
+    
+    const result = signupSchema.safeParse({ ...formData, agreeTerms });
+    
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0]) {
+          errors[issue.path[0] as string] = issue.message;
+        }
+      });
+      setFieldErrors(errors);
+      setError(Object.values(errors)[0] || 'Please fix the errors below');
       return false;
     }
-    if (!formData.email.includes('@')) {
-      setError('Please enter a valid email');
-      return false;
-    }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return false;
-    }
-    if (!formData.companyName.trim()) {
-      setError('Company name is required');
-      return false;
-    }
-    if (!agreeTerms) {
-      setError('You must agree to the terms and conditions');
-      return false;
-    }
+    
     return true;
   };
 
@@ -66,24 +62,31 @@ function SignupContent() {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { error: signUpError } = await signUp(formData.email, formData.password, {
+        fullName: formData.fullName,
+        companyName: formData.companyName,
+        accountType: formData.accountType as 'contractor' | 'procurement',
+      });
+      
+      if (signUpError) {
+        setLoading(false);
+        setError(signUpError.message || 'Failed to create account');
+        return;
+      }
       
       setLoading(false);
       setSuccess(true);
       
       // Redirect after 2 seconds
-      const redirectTimer = setTimeout(() => {
+      setTimeout(() => {
         const dashboardRoute = formData.accountType === 'procurement' 
           ? '/dashboard/procurement' 
           : '/dashboard/contractor';
         router.push(dashboardRoute);
       }, 2000);
-      
-      return () => clearTimeout(redirectTimer);
     } catch (err) {
       setLoading(false);
-      setError('An error occurred. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
       console.error('Signup error:', err);
     }
   };
@@ -93,10 +96,10 @@ function SignupContent() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-lg">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200 text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" aria-hidden="true" />
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Account Created!</h2>
             <p className="text-gray-600 mb-6 text-sm md:text-base">Welcome {formData.fullName}! Setting up your dashboard...</p>
-            <div className="animate-spin inline-block">
+            <div className="animate-spin inline-block" role="status" aria-label="Loading">
               <div className="border-4 border-gray-200 border-t-blue-600 rounded-full w-8 h-8"></div>
             </div>
           </div>
@@ -110,9 +113,9 @@ function SignupContent() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6 flex-col">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6 flex-col" aria-label="Go to FedMatch home">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold">SD</span>
+              <span className="text-white font-bold" aria-hidden="true">FM</span>
             </div>
             <span className="text-lg md:text-2xl font-bold text-gray-900">FedMatch</span>
           </Link>
@@ -122,15 +125,15 @@ function SignupContent() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3" role="alert">
+            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} aria-hidden="true" />
             <p className="text-red-700 text-xs md:text-sm">{error}</p>
           </div>
         )}
 
         {/* Signup Form */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200">
-          <form onSubmit={handleSignup} className="space-y-5">
+          <form onSubmit={handleSignup} className="space-y-5" noValidate>
             {/* Account Type Selection */}
             <div>
               <label className="block text-xs md:text-sm font-semibold text-gray-900 mb-3">I am a...</label>
@@ -298,27 +301,17 @@ function SignupContent() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-xs md:text-sm">
-              <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+              <span className="px-2 bg-white text-gray-500">Already have an account?</span>
             </div>
           </div>
 
-          {/* Social Signup */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <button type="button" className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 active:bg-gray-100 transition font-semibold text-sm md:text-base min-h-12">
-              Google
-            </button>
-            <button type="button" className="border border-gray-300 rounded-lg py-3 hover:bg-gray-50 active:bg-gray-100 transition font-semibold text-sm md:text-base min-h-12">
-              LinkedIn
-            </button>
-          </div>
-
           {/* Login Link */}
-          <p className="text-center text-gray-700 mt-6 text-xs md:text-sm">
-            Already have an account?{" "}
-            <Link href="/auth/login" className="text-blue-600 font-bold hover:text-blue-700">
-              Sign in here
-            </Link>
-          </p>
+          <Link
+            href="/auth/login"
+            className="w-full block text-center py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition text-sm md:text-base"
+          >
+            Sign In Instead
+          </Link>
         </div>
       </div>
     </div>
@@ -327,7 +320,7 @@ function SignupContent() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full" role="status" aria-label="Loading"></div></div>}>
       <SignupContent />
     </Suspense>
   );

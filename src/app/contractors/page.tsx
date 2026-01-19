@@ -6,12 +6,13 @@ import { Search, MapPin, Star, Briefcase, FileText, Award, CheckCircle, MessageS
 import Navigation from '@/components/Navigation';
 
 interface Contractor {
-  id: number;
+  id: string;
   name: string;
-  naces: string[];
+  companyName: string;
+  naicsCodes: string[];
   location: string;
   rating: number;
-  reviews: number;
+  reviewsCount: number;
   yearsInBusiness: number;
   serviceAreas: string[];
   pastPerformance: string;
@@ -21,7 +22,7 @@ interface Contractor {
   description?: string;
   email?: string;
   phone?: string;
-  projects?: number;
+  projectsCompleted?: number;
 }
 
 export default function ContractorsPage() {
@@ -33,16 +34,18 @@ export default function ContractorsPage() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
 
-  const contractors: Contractor[] = [];
+  // Contractors will be fetched from database - see useContractors hook
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Filter contractors based on search criteria
   const filteredContractors = contractors.filter(contractor => {
-    const matchesNace = naceCode === '' || contractor.naces.some(n => n.includes(naceCode));
+    const matchesNaics = naceCode === '' || contractor.naicsCodes.some(n => n.includes(naceCode));
     const matchesLocation = location === '' || contractor.location.toLowerCase().includes(location.toLowerCase()) || 
       contractor.serviceAreas.some(a => a.toLowerCase().includes(location.toLowerCase()));
     const matchesRating = minRating === 'all' || contractor.rating >= parseFloat(minRating);
     const matchesCert = certFilter === 'all' || contractor.certifications.includes(certFilter);
-    return matchesNace && matchesLocation && matchesRating && matchesCert;
+    return matchesNaics && matchesLocation && matchesRating && matchesCert;
   });
 
   const handleViewProfile = (contractor: Contractor) => {
@@ -146,7 +149,7 @@ export default function ContractorsPage() {
                     <Star size={16} className="text-yellow-500 fill-yellow-500" />
                     <span className="font-bold text-sm md:text-base">{contractor.rating}</span>
                   </div>
-                  <p className="text-xs text-gray-600">{contractor.reviews} reviews</p>
+                  <p className="text-xs text-gray-600">{contractor.reviewsCount} reviews</p>
                 </div>
               </div>
 
@@ -166,7 +169,7 @@ export default function ContractorsPage() {
 
               <div className="mb-3 space-y-2">
                 <p className="text-xs md:text-sm text-gray-700">
-                  <strong>NAICS Codes:</strong> {contractor.naces.join(', ')}
+                  <strong>NAICS Codes:</strong> {contractor.naicsCodes.join(', ')}
                 </p>
                 <p className="text-xs md:text-sm text-gray-700">
                   <strong>Years in Business:</strong> {contractor.yearsInBusiness}
@@ -246,7 +249,7 @@ export default function ContractorsPage() {
                   <Star size={20} className="text-yellow-500 fill-yellow-500" />
                   <span className="text-xl font-bold">{selectedContractor.rating}</span>
                 </div>
-                <span className="text-gray-600">({selectedContractor.reviews} reviews)</span>
+                <span className="text-gray-600">({selectedContractor.reviewsCount} reviews)</span>
               </div>
 
               {/* Certifications */}
@@ -278,7 +281,7 @@ export default function ContractorsPage() {
                 </div>
                 <div className="text-center">
                   <Briefcase size={24} className="mx-auto text-blue-600 mb-1" />
-                  <p className="text-2xl font-bold text-gray-900">{selectedContractor.projects}</p>
+                  <p className="text-2xl font-bold text-gray-900">{selectedContractor.projectsCompleted || 0}</p>
                   <p className="text-xs text-gray-600">Projects Completed</p>
                 </div>
                 <div className="text-center">
@@ -292,7 +295,7 @@ export default function ContractorsPage() {
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-2">NAICS Codes</h3>
                 <div className="flex flex-wrap gap-2">
-                  {selectedContractor.naces.map((code) => (
+                  {selectedContractor.naicsCodes.map((code: string) => (
                     <span key={code} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                       {code}
                     </span>

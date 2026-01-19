@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FedMatch",
-  description: "Connect contractors with opportunities on the leading government contracting platform",
+  title: {
+    default: "FedMatch | Government Contractor Matchmaking Platform",
+    template: "%s | FedMatch",
+  },
+  description: "Connect contractors with government procurement opportunities. Find teaming partners, browse RFPs, and grow your government contracting business.",
+  keywords: ["government contracting", "procurement", "NAICS", "small business", "DBE", "MBE", "teaming", "RFP"],
+  authors: [{ name: "FedMatch" }],
+  openGraph: {
+    title: "FedMatch | Government Contractor Matchmaking Platform",
+    description: "Connect contractors with government procurement opportunities.",
+    url: "https://supcourt.netlify.app",
+    siteName: "FedMatch",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FedMatch | Government Contractor Matchmaking Platform",
+    description: "Connect contractors with government procurement opportunities.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +50,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

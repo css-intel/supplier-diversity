@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { Send, Clock, X, Search, Video, Paperclip, MoreVertical, Phone, CheckCircle, Image, FileText, Download, Mic, MicOff, VideoOff, PhoneOff } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
+import { useMessages } from '@/lib/hooks/useMessages';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface Message {
-  id: number;
+  id: string;
   sender: string;
+  senderId: string;
   text: string;
   time: string;
   attachment?: {
@@ -17,8 +20,8 @@ interface Message {
   };
 }
 
-interface Conversation {
-  id: number;
+interface ConversationUI {
+  id: string;
   name: string;
   org: string;
   lastMessage: string;
@@ -27,10 +30,14 @@ interface Conversation {
   online: boolean;
   avatar: string;
   messages: Message[];
+  participantId: string;
 }
 
 export default function MessagesPage() {
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const { user, profile } = useAuth();
+  const { conversations: dbConversations, loading, sendMessage: sendDbMessage, fetchMessages } = useMessages(user?.id);
+  
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [showConversationList, setShowConversationList] = useState(true);
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,12 +48,47 @@ export default function MessagesPage() {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [messageSent, setMessageSent] = useState(false);
+  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  // Transform database conversations to UI format
+  const conversations: ConversationUI[] = dbConversations.map(conv => ({
+    id: conv.id,
+    name: conv.participant?.full_name || 'Unknown',
+    org: conv.participant?.company_name || '',
+    lastMessage: conv.lastMessage?.content || '',
+    time: conv.lastMessage ? new Date(conv.lastMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+    unread: conv.unreadCount,
+    online: false,
+    avatar: (conv.participant?.full_name || 'U').charAt(0).toUpperCase(),
+    messages: [],
+    participantId: conv.participant?.id || '',
+  }));
 
   const current = conversations.find(c => c.id === selectedConversation);
+  
+  // Load messages when conversation is selected
+  useEffect(() => {
+    if (selectedConversation) {
+      fetchMessages(selectedConversation).then(msgs => {
+        if (msgs && Array.isArray(msgs)) {
+          setCurrentMessages(msgs.map((m: {
+            id: string;
+            sender_id: string;
+            content: string;
+            created_at: string;
+          }) => ({
+            id: m.id,
+            sender: m.sender_id === user?.id ? 'You' : current?.name || 'Them',
+            senderId: m.sender_id,
+            text: m.content,
+            time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          })));
+        }
+      });
+    }
+  }, [selectedConversation, user?.id, current?.name, fetchMessages]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -72,40 +114,39 @@ export default function MessagesPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSendMessage = () => {
-    if (messageInput.trim() && current) {
-      const newMessage: Message = {
-        id: current.messages.length + 1,
-        sender: 'You',
-        text: messageInput,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === selectedConversation) {
-          return {
-            ...conv,
-            messages: [...conv.messages, newMessage],
-            lastMessage: messageInput,
-            time: 'Just now'
-          };
-        }
-        return conv;
-      }));
-
-      setMessageInput('');
-      setMessageSent(true);
-      setTimeout(() => setMessageSent(false), 2000);
+  const handleSendMessage = async () => {
+    if (messageInput.trim() && current && current.participantId) {
+      try {
+        await sendDbMessage(current.participantId, 'Message', messageInput, selectedConversation || undefined);
+        
+        // Add to local state immediately for responsive UI
+        const newMessage: Message = {
+          id: Date.now().toString(),
+          sender: 'You',
+          senderId: user?.id || '',
+          text: messageInput,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setCurrentMessages(prev => [...prev, newMessage]);
+        
+        setMessageInput('');
+        setMessageSent(true);
+        setTimeout(() => setMessageSent(false), 2000);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      }
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && current) {
+      // TODO: Implement file upload to Supabase Storage
       const isImage = file.type.startsWith('image/');
       const newMessage: Message = {
-        id: current.messages.length + 1,
+        id: Date.now().toString(),
         sender: 'You',
+        senderId: user?.id || '',
         text: `Sent ${isImage ? 'an image' : 'a file'}: ${file.name}`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         attachment: {
@@ -115,18 +156,7 @@ export default function MessagesPage() {
         }
       };
 
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === selectedConversation) {
-          return {
-            ...conv,
-            messages: [...conv.messages, newMessage],
-            lastMessage: `Sent ${file.name}`,
-            time: 'Just now'
-          };
-        }
-        return conv;
-      }));
-
+      setCurrentMessages(prev => [...prev, newMessage]);
       setShowAttachmentMenu(false);
     }
   };
@@ -177,10 +207,7 @@ export default function MessagesPage() {
                   onClick={() => {
                     setSelectedConversation(conv.id);
                     setShowConversationList(false);
-                    // Clear unread count
-                    setConversations(prev => prev.map(c => 
-                      c.id === conv.id ? { ...c, unread: 0 } : c
-                    ));
+                    // Mark conversation as read - handled by fetchMessages
                   }}
                   className={`w-full text-left p-3 md:p-4 hover:bg-gray-50 transition border-l-4 ${
                     selectedConversation === conv.id 

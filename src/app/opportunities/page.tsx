@@ -4,18 +4,20 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { MapPin, DollarSign, Clock, X, Star, Bookmark, Calendar, Filter, Eye, FileText, Paperclip, Send, MessageSquare, CheckCircle, Upload } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { useOpportunities, useSavedOpportunities } from '@/lib/hooks/useOpportunities';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface Opportunity {
-  id: number;
+  id: string;
   title: string;
-  nacis: string;
+  naicsCodes: string[];
   location: string;
-  budgetMin: number;
-  budgetMax: number;
+  budgetMin?: number;
+  budgetMax?: number;
   deadline: string;
   datePosted: string;
   description: string;
-  bids: number;
+  bidsCount: number;
   postedBy: string;
   type: 'procurement' | 'teaming';
   attachments: number;
@@ -24,19 +26,37 @@ interface Opportunity {
 }
 
 export default function OpportunitiesPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('browse');
   const [typeFilter, setTypeFilter] = useState<'all' | 'procurement' | 'teaming'>('all');
-  const [savedOpportunities, setSavedOpportunities] = useState<number[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const { opportunities: dbOpportunities, loading, createOpportunity } = useOpportunities({
+    type: typeFilter,
+    status: 'open',
+    searchQuery,
+  });
+  
+  const { savedIds, toggleSave, isSaved } = useSavedOpportunities(user?.id);
+  
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [showBidModal, setShowBidModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [bidSubmitted, setBidSubmitted] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  const [newOpportunity, setNewOpportunity] = useState({
+  const [newOpportunity, setNewOpportunity] = useState<{
+    type: 'procurement' | 'teaming';
+    title: string;
+    naicsCodes: string;
+    location: string;
+    budgetMin: string;
+    budgetMax: string;
+    description: string;
+    deadline: string;
+  }>({
     type: 'procurement',
     title: '',
-    nacis: '',
+    naicsCodes: '',
     location: '',
     budgetMin: '',
     budgetMax: '',
@@ -44,22 +64,33 @@ export default function OpportunitiesPage() {
     deadline: ''
   });
 
-  const opportunities: Opportunity[] = [];
+  // Transform database opportunities to component format
+  const opportunities: Opportunity[] = dbOpportunities.map(opp => ({
+    id: opp.id,
+    title: opp.title,
+    naicsCodes: opp.naics_codes || [],
+    location: opp.location,
+    budgetMin: opp.budget_min || undefined,
+    budgetMax: opp.budget_max || undefined,
+    deadline: opp.submission_deadline,
+    datePosted: opp.created_at,
+    description: opp.description,
+    bidsCount: 0, // Would need a separate query or count from DB
+    postedBy: opp.poster?.company_name || 'Unknown',
+    type: opp.type as 'procurement' | 'teaming',
+    attachments: opp.attachments_count || 0,
+    requirements: opp.requirements || [],
+    contactEmail: opp.contact_email || '',
+  }));
 
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesType = typeFilter === 'all' || opp.type === typeFilter;
     const matchesSearch = searchQuery === '' || 
       opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      opp.nacis.includes(searchQuery) ||
+      opp.naicsCodes.some((code: string) => code.includes(searchQuery)) ||
       opp.location.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesType && matchesSearch;
   });
-
-  const toggleSave = (id: number) => {
-    setSavedOpportunities(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
 
   const getDaysUntilDeadline = (deadline: string) => {
     const today = new Date();
@@ -92,9 +123,9 @@ export default function OpportunitiesPage() {
     e.preventDefault();
     alert('Opportunity posted successfully! It will be visible to contractors matching your NAICS code.');
     setNewOpportunity({
-      type: 'procurement',
+      type: 'procurement' as const,
       title: '',
-      nacis: '',
+      naicsCodes: '',
       location: '',
       budgetMin: '',
       budgetMax: '',
@@ -105,7 +136,7 @@ export default function OpportunitiesPage() {
   };
 
   const handlePreview = () => {
-    if (newOpportunity.title && newOpportunity.nacis) {
+    if (newOpportunity.title && newOpportunity.naicsCodes) {
       setShowPreviewModal(true);
     } else {
       alert('Please fill in at least Title and NAICS Code to preview');
@@ -122,10 +153,10 @@ export default function OpportunitiesPage() {
             <h1 className="text-2xl md:text-4xl font-bold">Contract Opportunities</h1>
             <p className="text-gray-600 mt-1">Find procurement RFPs and teaming partners</p>
           </div>
-          {savedOpportunities.length > 0 && (
+          {savedIds.size > 0 && (
             <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
               <Bookmark size={16} className="fill-blue-600" />
-              <span>{savedOpportunities.length} saved</span>
+              <span>{savedIds.size} saved</span>
             </div>
           )}
         </div>
@@ -211,11 +242,11 @@ export default function OpportunitiesPage() {
                         <button 
                           onClick={() => toggleSave(opp.id)}
                           className={`p-1 rounded transition flex-shrink-0 ${
-                            savedOpportunities.includes(opp.id) ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'
+                            isSaved(opp.id) ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'
                           }`}
-                          title={savedOpportunities.includes(opp.id) ? 'Remove from saved' : 'Save opportunity'}
+                          title={isSaved(opp.id) ? 'Remove from saved' : 'Save opportunity'}
                         >
-                          <Star size={20} className={savedOpportunities.includes(opp.id) ? 'fill-yellow-500' : ''} />
+                          <Star size={20} className={isSaved(opp.id) ? 'fill-yellow-500' : ''} />
                         </button>
                       </div>
                       <p className="text-xs md:text-sm text-gray-600 mt-1">{opp.postedBy}</p>
@@ -227,7 +258,7 @@ export default function OpportunitiesPage() {
                         {opp.type === 'teaming' ? '🤝 Teaming' : '🏛️ Procurement'}
                       </span>
                       <span className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                        {opp.bids} bids
+                        {opp.bidsCount} bids
                       </span>
                     </div>
                   </div>
@@ -236,7 +267,7 @@ export default function OpportunitiesPage() {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-4">
                   <div className="text-xs md:text-sm">
                     <p className="text-gray-600">NAICS Code</p>
-                    <p className="font-semibold text-gray-900">{opp.nacis}</p>
+                    <p className="font-semibold text-gray-900">{opp.naicsCodes}</p>
                   </div>
                   <div className="text-xs md:text-sm">
                     <p className="text-gray-600 flex items-center gap-1"><MapPin size={14} /> Location</p>
@@ -244,7 +275,11 @@ export default function OpportunitiesPage() {
                   </div>
                   <div className="text-xs md:text-sm">
                     <p className="text-gray-600 flex items-center gap-1"><DollarSign size={14} /> Est. Budget</p>
-                    <p className="font-semibold text-gray-900">${(opp.budgetMin/1000).toFixed(0)}k - ${(opp.budgetMax/1000).toFixed(0)}k</p>
+                    <p className="font-semibold text-gray-900">
+                      {opp.budgetMin && opp.budgetMax 
+                        ? `$${(opp.budgetMin/1000).toFixed(0)}k - $${(opp.budgetMax/1000).toFixed(0)}k`
+                        : 'Contact for quote'}
+                    </p>
                   </div>
                   <div className="text-xs md:text-sm">
                     <p className="text-gray-600 flex items-center gap-1"><Clock size={14} /> Deadline</p>
@@ -308,7 +343,7 @@ export default function OpportunitiesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Opportunity Type *</label>
                 <select 
                   value={newOpportunity.type}
-                  onChange={(e) => setNewOpportunity({...newOpportunity, type: e.target.value})}
+                  onChange={(e) => setNewOpportunity({...newOpportunity, type: e.target.value as 'procurement' | 'teaming'})}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="procurement">🏛️ Procurement - Direct RFP/Contract</option>
@@ -334,8 +369,8 @@ export default function OpportunitiesPage() {
                   <input
                     type="text"
                     required
-                    value={newOpportunity.nacis}
-                    onChange={(e) => setNewOpportunity({...newOpportunity, nacis: e.target.value})}
+                    value={newOpportunity.naicsCodes}
+                    onChange={(e) => setNewOpportunity({...newOpportunity, naicsCodes: e.target.value})}
                     placeholder="e.g., 27110"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -455,7 +490,7 @@ export default function OpportunitiesPage() {
               <div className="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-600">NAICS Code</p>
-                  <p className="font-semibold">{selectedOpportunity.nacis}</p>
+                  <p className="font-semibold">{selectedOpportunity.naicsCodes}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Location</p>
@@ -463,7 +498,11 @@ export default function OpportunitiesPage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Budget Range</p>
-                  <p className="font-semibold">${selectedOpportunity.budgetMin.toLocaleString()} - ${selectedOpportunity.budgetMax.toLocaleString()}</p>
+                  <p className="font-semibold">
+                    {selectedOpportunity.budgetMin && selectedOpportunity.budgetMax 
+                      ? `$${selectedOpportunity.budgetMin.toLocaleString()} - $${selectedOpportunity.budgetMax.toLocaleString()}`
+                      : 'Contact for quote'}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Deadline</p>
@@ -512,12 +551,12 @@ export default function OpportunitiesPage() {
                 <button 
                   onClick={() => toggleSave(selectedOpportunity.id)}
                   className={`px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 ${
-                    savedOpportunities.includes(selectedOpportunity.id)
+                    isSaved(selectedOpportunity.id)
                       ? 'bg-yellow-100 text-yellow-700'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <Star size={18} className={savedOpportunities.includes(selectedOpportunity.id) ? 'fill-yellow-500' : ''} />
+                  <Star size={18} className={isSaved(selectedOpportunity.id) ? 'fill-yellow-500' : ''} />
                 </button>
                 <Link href="/messages" className="px-4 py-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold flex items-center justify-center gap-2">
                   <MessageSquare size={18} />
@@ -648,7 +687,7 @@ export default function OpportunitiesPage() {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <p className="text-sm text-gray-600">NAICS</p>
-                    <p className="font-semibold">{newOpportunity.nacis || '-'}</p>
+                    <p className="font-semibold">{newOpportunity.naicsCodes || '-'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Location</p>
@@ -695,3 +734,4 @@ export default function OpportunitiesPage() {
     </div>
   );
 }
+
