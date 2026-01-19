@@ -41,21 +41,13 @@ export default function Navigation({ activeItem }: NavigationProps) {
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
         
-        <button 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2"
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-        
-        <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex absolute md:relative top-16 left-0 md:top-0 w-full md:w-auto bg-white md:bg-transparent flex-col md:flex-row gap-4 p-4 md:p-0 md:gap-8 shadow-lg md:shadow-none`}>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <Link 
               key={item.key}
               href={item.href} 
-              onClick={() => setMobileMenuOpen(false)}
-              className={`font-medium py-2 md:py-0 ${
+              className={`font-medium ${
                 activeItem === item.key 
                   ? 'text-blue-600' 
                   : 'text-gray-700 hover:text-blue-600'
@@ -64,55 +56,119 @@ export default function Navigation({ activeItem }: NavigationProps) {
               {item.label}
             </Link>
           ))}
-          
-          {/* Auth section - show login/signup by default, then update when auth loads */}
+        </div>
+
+        {/* Desktop Auth Buttons - Always visible */}
+        <div className="hidden md:flex items-center gap-4">
           {loading ? (
-            // Show login link even during loading so users see sign-in option immediately
-            <Link 
-              href="/auth/login" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0"
-            >
+            <Link href="/auth/login" className="text-gray-700 hover:text-blue-600 font-medium">
               Login
             </Link>
           ) : user ? (
-                <>
-                  <Link 
-                    href={profile?.account_type === 'contractor' ? '/dashboard/contractor' : '/dashboard/procurement'}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0 flex items-center gap-2"
-                  >
-                    <User size={16} />
-                    {profile?.full_name || 'Dashboard'}
-                  </Link>
-                  <button 
-                    onClick={handleLogout}
-                    className="text-gray-700 hover:text-red-600 font-medium py-2 md:py-0 flex items-center gap-2"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    href="/auth/login" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0"
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    href="/auth/signup" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="btn btn-primary"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
+            <>
+              <Link 
+                href={profile?.account_type === 'contractor' ? '/dashboard/contractor' : '/dashboard/procurement'}
+                className="text-gray-700 hover:text-blue-600 font-medium flex items-center gap-2"
+              >
+                <User size={16} />
+                {profile?.full_name || 'Dashboard'}
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="text-gray-700 hover:text-red-600 font-medium flex items-center gap-2"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/login" className="text-gray-700 hover:text-blue-600 font-medium">
+                Login
+              </Link>
+              <Link href="/auth/signup" className="btn btn-primary">
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-2"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg z-50">
+          <div className="flex flex-col p-4 gap-4">
+            {navItems.map((item) => (
+              <Link 
+                key={item.key}
+                href={item.href} 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`font-medium py-2 ${
+                  activeItem === item.key 
+                    ? 'text-blue-600' 
+                    : 'text-gray-700 hover:text-blue-600'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <hr className="border-gray-200" />
+            {loading ? (
+              <Link 
+                href="/auth/login" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-700 hover:text-blue-600 font-medium py-2"
+              >
+                Login
+              </Link>
+            ) : user ? (
+              <>
+                <Link 
+                  href={profile?.account_type === 'contractor' ? '/dashboard/contractor' : '/dashboard/procurement'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-blue-600 font-medium py-2 flex items-center gap-2"
+                >
+                  <User size={16} />
+                  {profile?.full_name || 'Dashboard'}
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-red-600 font-medium py-2 flex items-center gap-2"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  href="/auth/login" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-blue-600 font-medium py-2"
+                >
+                  Login
+                </Link>
+                <Link 
+                  href="/auth/signup" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="btn btn-primary text-center"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
