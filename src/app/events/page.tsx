@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Calendar, MapPin, Users, ArrowRight, ClipboardList, Sparkles, X, CheckCircle, Search } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, ClipboardList, Sparkles, X, CheckCircle, Search, Info } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useEvents, useEventRegistration } from '@/lib/hooks/useEvents';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -34,6 +34,7 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [registered, setRegistered] = useState(false);
+  const [showComingSoonModal, setShowComingSoonModal] = useState<'survey' | 'recording' | null>(null);
 
   // Transform database events to component format
   const events: Event[] = dbEvents.map(e => ({
@@ -218,7 +219,11 @@ export default function EventsPage() {
               </ul>
             </div>
             <div>
-              <button className="btn btn-purple btn-lg">
+              {/* TODO: Implement survey creation feature - currently shows coming soon */}
+              <button 
+                onClick={() => setShowComingSoonModal('survey')}
+                className="btn btn-purple btn-lg"
+              >
                 <ClipboardList size={18} />
                 Create Survey
               </button>
@@ -231,12 +236,46 @@ export default function EventsPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Past Events</h2>
           <div className="bg-gray-50 rounded-lg p-8 text-center">
             <p className="text-gray-600 mb-4">Check back soon for past event recordings and materials</p>
-            <button className="btn btn-primary">
+            {/* TODO: Implement recording request feature - currently shows coming soon */}
+            <button 
+              onClick={() => setShowComingSoonModal('recording')}
+              className="btn btn-primary"
+            >
               Request Recording
             </button>
           </div>
         </div>
       </div>
+
+      {/* Coming Soon Modal */}
+      {showComingSoonModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Info size={20} className="text-blue-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Coming Soon</h2>
+              </div>
+              <button onClick={() => setShowComingSoonModal(null)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">
+              {showComingSoonModal === 'survey' 
+                ? 'The survey creation feature is currently under development. Check back soon for the ability to create and distribute surveys to your event attendees.'
+                : 'The recording request feature is currently under development. Check back soon for the ability to request recordings of past events.'}
+            </p>
+            <button 
+              onClick={() => setShowComingSoonModal(null)}
+              className="btn btn-primary btn-full"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Event Details Modal */}
       {selectedEvent && !showRegistrationModal && (
