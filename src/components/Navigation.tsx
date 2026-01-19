@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Menu, X, LogOut, User } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
@@ -11,6 +12,8 @@ interface NavigationProps {
 
 export default function Navigation({ activeItem }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
+  const router = useRouter();
   const { user, profile, signOut, loading } = useAuth();
 
   const navItems = [
@@ -21,8 +24,16 @@ export default function Navigation({ activeItem }: NavigationProps) {
   ];
 
   const handleLogout = async () => {
-    await signOut();
-    setMobileMenuOpen(false);
+    try {
+      setLogoutError(false);
+      await signOut();
+      setMobileMenuOpen(false);
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setLogoutError(true);
+      setTimeout(() => setLogoutError(false), 3000);
+    }
   };
 
   return (
@@ -54,9 +65,17 @@ export default function Navigation({ activeItem }: NavigationProps) {
             </Link>
           ))}
           
-          {!loading && (
-            <>
-              {user ? (
+          {/* Auth section - show login/signup by default, then update when auth loads */}
+          {loading ? (
+            // Show login link even during loading so users see sign-in option immediately
+            <Link 
+              href="/auth/login" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-gray-700 hover:text-blue-600 font-medium py-2 md:py-0"
+            >
+              Login
+            </Link>
+          ) : user ? (
                 <>
                   <Link 
                     href={profile?.account_type === 'contractor' ? '/dashboard/contractor' : '/dashboard/procurement'}
@@ -92,8 +111,6 @@ export default function Navigation({ activeItem }: NavigationProps) {
                   </Link>
                 </>
               )}
-            </>
-          )}
         </div>
       </div>
     </nav>
