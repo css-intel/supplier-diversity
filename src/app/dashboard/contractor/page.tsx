@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Search, Briefcase, MessageSquare, Bell, Filter, Star, Paperclip, CheckCircle, Send, MapPin, DollarSign, Clock, X, Download } from 'lucide-react';
+import { Search, Briefcase, MessageSquare, Bell, Filter, Star, Paperclip, CheckCircle, Send, MapPin, DollarSign, Clock, X, Download, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DashboardNavigation from '@/components/DashboardNavigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useOpportunities, useSavedOpportunities } from '@/lib/hooks/useOpportunities';
 import { useBids } from '@/lib/hooks/useBids';
+import { createClient } from '@/lib/supabase/client';
 
 interface Opportunity {
   id: string;
@@ -29,7 +30,7 @@ interface Opportunity {
 
 export default function ContractorDashboard() {
   const router = useRouter();
-  const { user, profile, contractorProfile, loading: authLoading } = useAuth();
+  const { user, profile, contractorProfile, loading: authLoading, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<'opportunities' | 'profile' | 'alerts' | 'messages'>('opportunities');
   const [searchQuery, setSearchQuery] = useState('');
   const [naicsFilter, setNaicsFilter] = useState('');
@@ -80,6 +81,7 @@ export default function ContractorDashboard() {
   const [showBidModal, setShowBidModal] = useState(false);
   const [bidSubmitted, setBidSubmitted] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   
   // Profile form state - prefill with existing data
   const [profileData, setProfileData] = useState({
@@ -161,10 +163,65 @@ export default function ContractorDashboard() {
     }, 2000);
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 3000);
+    if (!user) return;
+
+    const supabase = createClient();
+    
+    // Prepare certifications array from checkboxes
+    const certsArray: string[] = [];
+    if (profileData.certifications.dbe) certsArray.push('DBE');
+    if (profileData.certifications.hubzone) certsArray.push('HUBZone');
+    if (profileData.certifications.eighta) certsArray.push('8(a)');
+    if (profileData.certifications.mbe) certsArray.push('MBE');
+    if (profileData.certifications.wbe) certsArray.push('WBE');
+
+    try {
+      // Update profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          company_name: profileData.companyName,
+          description: profileData.description,
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Update contractor_profiles table
+      const { error: contractorError } = await supabase
+        .from('contractor_profiles')
+        .update({
+          naics_codes: profileData.naicsCodes.split(',').map(s => s.trim()).filter(Boolean),
+          service_areas: profileData.serviceAreas.split(',').map(s => s.trim()).filter(Boolean),
+          certifications: certsArray,
+          open_to_teaming: profileData.openTo.teaming,
+          open_to_jv: profileData.openTo.jv,
+          open_to_subcontracting: profileData.openTo.subcontracting,
+        })
+        .eq('profile_id', user.id);
+
+      if (contractorError) throw contractorError;
+
+      // Refresh profile in auth context
+      await refreshProfile();
+      
+      setProfileSaved(true);
+      setProfileError(null);
+      setTimeout(() => setProfileSaved(false), 3000);
+      
+      // TODO: Remove localStorage fallback once API is confirmed working
+      // Temporary localStorage backup in case Supabase RLS blocks update
+      localStorage.setItem('fedmatch-profile-draft', JSON.stringify(profileData));
+    } catch (error) {
+      console.error('Profile save error:', error);
+      setProfileError('Failed to save profile. Please try again.');
+      setTimeout(() => setProfileError(null), 5000);
+      
+      // Fallback to localStorage so data isn't lost
+      localStorage.setItem('fedmatch-profile-draft', JSON.stringify(profileData));
+    }
   };
 
   return (
@@ -321,6 +378,12 @@ export default function ContractorDashboard() {
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
                 <CheckCircle size={20} />
                 Profile saved successfully!
+              </div>
+            )}
+            {profileError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+                <AlertCircle size={20} />
+                {profileError}
               </div>
             )}
             <form className="space-y-6" onSubmit={handleSaveProfile}>
