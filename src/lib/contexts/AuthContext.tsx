@@ -150,9 +150,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setProfile(null);
-    setContractorProfile(null);
+    try {
+      await supabase.auth.signOut();
+      // Clear any localStorage items related to the app
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('fedmatch-profile-draft');
+        // Clear any other app-specific localStorage keys here
+      }
+      setProfile(null);
+      setContractorProfile(null);
+      setUser(null);
+      setSession(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear local state even if Supabase call fails
+      setProfile(null);
+      setContractorProfile(null);
+      setUser(null);
+      setSession(null);
+      throw error; // Re-throw so callers can handle
+    }
   };
 
   return (
