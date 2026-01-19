@@ -38,11 +38,11 @@ export default function Navigation({ activeItem }: NavigationProps) {
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
         <Link href="/" className="text-xl md:text-2xl font-bold text-blue-600">FedMatch</Link>
         
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop Navigation - centered */}
+        <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
           {navItems.map((item) => (
             <Link 
               key={item.key}
@@ -58,8 +58,8 @@ export default function Navigation({ activeItem }: NavigationProps) {
           ))}
         </div>
 
-        {/* Desktop Auth Buttons - Always visible */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop Auth Buttons - right aligned */}
+        <div className="hidden md:flex items-center gap-4 ml-auto">
           {loading ? (
             <Link href="/auth/login" className="text-gray-700 hover:text-blue-600 font-medium">
               Login
