@@ -558,7 +558,7 @@ export default function OpportunitiesPage() {
                 >
                   <Star size={18} className={isSaved(selectedOpportunity.id) ? 'fill-yellow-500' : ''} />
                 </button>
-                <Link href="/messages" className="px-4 py-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold flex items-center justify-center gap-2">
+                <Link href="/messages" className="btn btn-outline">
                   <MessageSquare size={18} />
                 </Link>
               </div>
@@ -714,7 +714,7 @@ export default function OpportunitiesPage() {
               </div>
 
               <div className="flex gap-3 pt-4 border-t">
-                <button onClick={() => setShowPreviewModal(false)} className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold">
+                <button onClick={() => setShowPreviewModal(false)} className="btn btn-gray btn-lg flex-1">
                   Edit
                 </button>
                 <button
@@ -722,7 +722,7 @@ export default function OpportunitiesPage() {
                     setShowPreviewModal(false);
                     handlePostOpportunity(new Event('submit') as unknown as React.FormEvent);
                   }}
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold"
+                  className="btn btn-primary btn-lg flex-1"
                 >
                   Post
                 </button>

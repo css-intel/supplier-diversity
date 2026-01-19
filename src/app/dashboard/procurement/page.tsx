@@ -303,10 +303,10 @@ export default function ProcurementDashboard() {
                 </div>
 
                 <div className="flex gap-3">
-                  <button type="submit" className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                  <button type="submit" className="btn btn-primary btn-lg flex-1">
                     Post Opportunity
                   </button>
-                  <button type="button" onClick={() => setShowPostForm(false)} className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300">
+                  <button type="button" onClick={() => setShowPostForm(false)} className="btn btn-gray btn-lg flex-1">
                     Cancel
                   </button>
                 </div>
@@ -321,7 +321,7 @@ export default function ProcurementDashboard() {
             <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">My Posted Opportunities</h2>
-                <button onClick={() => setShowPostForm(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 flex items-center gap-2">
+                <button onClick={() => setShowPostForm(true)} className="btn btn-primary">
                   <Plus size={18} />
                   Post Opportunity
                 </button>
@@ -364,14 +364,14 @@ export default function ProcurementDashboard() {
                       <div className="flex gap-2 flex-wrap">
                         <button 
                           onClick={() => handleViewBids(opp)}
-                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+                          className="btn btn-primary btn-sm flex-1"
                         >
                           <Eye size={16} />
                           View Bids ({opp.bids.length})
                         </button>
                         <button 
                           onClick={() => handleEditOpportunity(opp)}
-                          className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 text-sm flex items-center justify-center gap-2"
+                          className="btn btn-gray btn-sm flex-1"
                         >
                           <Edit size={16} />
                           Edit
@@ -390,7 +390,7 @@ export default function ProcurementDashboard() {
                 <div className="text-center py-12">
                   <Briefcase size={48} className="text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-600">No opportunities posted yet</p>
-                  <button onClick={() => setShowPostForm(true)} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                  <button onClick={() => setShowPostForm(true)} className="btn btn-primary btn-lg mt-4">
                     Post Your First Opportunity
                   </button>
                 </div>
@@ -462,13 +462,13 @@ export default function ProcurementDashboard() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => handleViewContractor(contractor)}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 text-sm"
+                      className="btn btn-primary btn-sm flex-1"
                     >
                       View Profile
                     </button>
                     <button 
                       onClick={() => handleMessageContractor(contractor)}
-                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 text-sm"
+                      className="btn btn-gray btn-sm flex-1"
                     >
                       Message
                     </button>
@@ -517,7 +517,7 @@ export default function ProcurementDashboard() {
                 <input type="text" placeholder="Enter your location" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
               </div>
 
-              <button type="submit" className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+              <button type="submit" className="btn btn-primary btn-lg btn-full">
                 Save Profile
               </button>
             </form>
@@ -568,11 +568,11 @@ export default function ProcurementDashboard() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setSelectedBid(bid)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                      className="btn btn-primary btn-sm"
                     >
                       Select Bid
                     </button>
-                    <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300 flex items-center gap-1">
+                    <button className="btn btn-gray btn-sm">
                       <Paperclip size={14} />
                       View Attachments
                     </button>
@@ -581,7 +581,7 @@ export default function ProcurementDashboard() {
                         setSelectedContractor({ id: bid.id, name: bid.contactName, company: bid.companyName, naicsCodes: [], location: '', certifications: bid.certifications, rating: 0, email: bid.email, description: '' });
                         setShowMessageModal(true);
                       }}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300"
+                      className="btn btn-gray btn-sm"
                     >
                       Message
                     </button>
@@ -597,7 +597,7 @@ export default function ProcurementDashboard() {
                     <p className="font-semibold text-green-700">Selected: {selectedBid.companyName}</p>
                     <p className="text-sm text-green-600">Bid Amount: ${selectedBid.amount.toLocaleString()}</p>
                   </div>
-                  <button className="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">
+                  <button className="btn btn-success">
                     Award Contract
                   </button>
                 </div>
@@ -694,10 +694,10 @@ export default function ProcurementDashboard() {
                 />
               </div>
               <div className="flex gap-3">
-                <button type="button" onClick={() => {setShowEditModal(false); setSelectedOpportunity(null);}} className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300">
+                <button type="button" onClick={() => {setShowEditModal(false); setSelectedOpportunity(null);}} className="btn btn-gray flex-1">
                   Cancel
                 </button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                <button type="submit" className="btn btn-primary flex-1">
                   Save Changes
                 </button>
               </div>
@@ -717,13 +717,13 @@ export default function ProcurementDashboard() {
             <div className="flex gap-3">
               <button 
                 onClick={() => {setShowDeleteConfirm(false); setSelectedOpportunity(null);}}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
+                className="btn btn-gray flex-1"
               >
                 Cancel
               </button>
               <button 
                 onClick={confirmDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
+                className="btn btn-danger flex-1"
               >
                 Delete
               </button>
@@ -795,11 +795,11 @@ export default function ProcurementDashboard() {
                   setShowContractorModal(false);
                   setShowMessageModal(true);
                 }}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+                className="btn btn-primary flex-1"
               >
                 Send Message
               </button>
-              <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 flex items-center gap-2">
+              <button className="btn btn-gray">
                 <Download size={16} />
                 Capability Statement
               </button>

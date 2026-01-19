@@ -113,7 +113,7 @@ export default function GovContractingGuidePage() {
 
           {/* CTA */}
           <div className="mt-8 text-center">
-            <Link href="/auth/signup" className="inline-block px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+            <Link href="/auth/signup" className="btn btn-primary btn-lg">
               Get Started Today
             </Link>
           </div>

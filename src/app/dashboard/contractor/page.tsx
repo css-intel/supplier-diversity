@@ -459,7 +459,7 @@ export default function ContractorDashboard() {
                 </div>
               </div>
 
-              <button type="submit" className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+              <button type="submit" className="btn btn-primary btn-lg btn-full">
                 Save Profile
               </button>
             </form>

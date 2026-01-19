@@ -218,7 +218,7 @@ export default function EventsPage() {
               </ul>
             </div>
             <div>
-              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 flex items-center gap-2">
+              <button className="btn btn-purple btn-lg">
                 <ClipboardList size={18} />
                 Create Survey
               </button>
@@ -231,7 +231,7 @@ export default function EventsPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Past Events</h2>
           <div className="bg-gray-50 rounded-lg p-8 text-center">
             <p className="text-gray-600 mb-4">Check back soon for past event recordings and materials</p>
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold">
+            <button className="btn btn-primary">
               Request Recording
             </button>
           </div>

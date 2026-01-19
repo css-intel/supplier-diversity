@@ -25,7 +25,7 @@ export default function Home() {
               placeholder="Search by NAICS code, location, certification..."
               className="flex-1 px-3 md:px-4 py-2 md:py-3 rounded-lg text-gray-800 text-sm md:text-base"
             />
-            <button className="px-4 md:px-6 py-2 md:py-3 bg-yellow-500 text-gray-900 rounded-lg font-semibold hover:bg-yellow-400 flex items-center justify-center gap-2 whitespace-nowrap">
+            <button className="btn btn-yellow btn-lg whitespace-nowrap">
               <Search size={18} />
               <span className="hidden md:inline">Search</span>
             </button>
@@ -218,10 +218,10 @@ export default function Home() {
           <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-6">Ready to Get Started?</h2>
           <p className="text-base md:text-lg mb-6 md:mb-8">Join thousands of contractors and procurement officers using FedMatch</p>
           <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
-            <Link href="/auth/signup?type=contractor" className="btn btn-lg bg-white text-blue-600 hover:bg-gray-100">
+            <Link href="/auth/signup?type=contractor" className="btn btn-white btn-lg">
               Contractor <ArrowRight size={18} />
             </Link>
-            <Link href="/auth/signup?type=procurement" className="btn btn-lg bg-yellow-500 text-gray-900 hover:bg-yellow-400">
+            <Link href="/auth/signup?type=procurement" className="btn btn-yellow btn-lg">
               Procurement <ArrowRight size={18} />
             </Link>
           </div>
