@@ -86,7 +86,7 @@ export default function Navigation({ activeItem }: NavigationProps) {
                   <Link 
                     href="/auth/signup" 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-center"
+                    className="btn btn-primary"
                   >
                     Sign Up
                   </Link>

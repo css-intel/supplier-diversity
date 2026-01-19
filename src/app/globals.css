@@ -24,3 +24,44 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Standardized Button Styles */
+.btn {
+  @apply px-4 py-2.5 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2 text-sm md:text-base;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800;
+}
+
+.btn-secondary {
+  @apply border-2 border-blue-600 text-blue-600 hover:bg-blue-50;
+}
+
+.btn-outline {
+  @apply border border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-base md:text-lg;
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-xs md:text-sm;
+}
+
+.btn-full {
+  @apply w-full;
+}
+
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}

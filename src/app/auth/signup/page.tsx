@@ -279,7 +279,7 @@ function SignupContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition flex items-center justify-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed text-sm md:text-base min-h-12"
+              className="btn btn-primary btn-lg btn-full min-h-12 disabled:bg-blue-400"
             >
               {loading ? (
                 <>
@@ -308,7 +308,7 @@ function SignupContent() {
           {/* Login Link */}
           <Link
             href="/auth/login"
-            className="w-full block text-center py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition text-sm md:text-base"
+            className="btn btn-secondary btn-lg btn-full"
           >
             Sign In Instead
           </Link>

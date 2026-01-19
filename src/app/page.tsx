@@ -94,7 +94,7 @@ export default function Home() {
                   <span className="text-sm md:text-base">Upload capability statements & past performance</span>
                 </li>
               </ul>
-              <Link href="/auth/signup?type=contractor" className="mt-6 md:mt-8 block w-full text-center bg-blue-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-blue-700 text-sm md:text-base">
+              <Link href="/auth/signup?type=contractor" className="btn btn-primary btn-lg btn-full mt-6 md:mt-8">
                 I'm a Contractor
               </Link>
             </div>
@@ -127,7 +127,7 @@ export default function Home() {
                   <span className="text-sm md:text-base">Track who views & saves your opportunities</span>
                 </li>
               </ul>
-              <Link href="/auth/signup?type=procurement" className="mt-6 md:mt-8 block w-full text-center bg-blue-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-blue-700 text-sm md:text-base">
+              <Link href="/auth/signup?type=procurement" className="btn btn-primary btn-lg btn-full mt-6 md:mt-8">
                 I'm Procurement Officer
               </Link>
             </div>
@@ -218,10 +218,10 @@ export default function Home() {
           <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-6">Ready to Get Started?</h2>
           <p className="text-base md:text-lg mb-6 md:mb-8">Join thousands of contractors and procurement officers using FedMatch</p>
           <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center">
-            <Link href="/auth/signup?type=contractor" className="px-6 md:px-8 py-2 md:py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 flex items-center justify-center gap-2 text-sm md:text-base">
+            <Link href="/auth/signup?type=contractor" className="btn btn-lg bg-white text-blue-600 hover:bg-gray-100">
               Contractor <ArrowRight size={18} />
             </Link>
-            <Link href="/auth/signup?type=procurement" className="px-6 md:px-8 py-2 md:py-3 bg-yellow-500 text-gray-900 rounded-lg font-semibold hover:bg-yellow-400 flex items-center justify-center gap-2 text-sm md:text-base">
+            <Link href="/auth/signup?type=procurement" className="btn btn-lg bg-yellow-500 text-gray-900 hover:bg-yellow-400">
               Procurement <ArrowRight size={18} />
             </Link>
           </div>
