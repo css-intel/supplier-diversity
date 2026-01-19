@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X, LogOut } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface DashboardNavigationProps {
   userName: string;
@@ -14,11 +14,10 @@ interface DashboardNavigationProps {
 
 export default function DashboardNavigation({ userName, dashboardType, activeTab, onTabChange }: DashboardNavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('userAuth');
-    router.push('/');
+  const handleLogout = async () => {
+    await signOut();
   };
 
   const contractorTabs = [
