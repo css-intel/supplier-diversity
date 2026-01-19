@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Search, Plus, Filter, Briefcase, Users, MessageSquare, Trash2, CheckCircle, Edit, Eye, Star, MapPin, Send, Paperclip, Download, X } from 'lucide-react';
+import { Search, Plus, Filter, Briefcase, Users, MessageSquare, Trash2, CheckCircle, Edit, Eye, Star, MapPin, Send, Paperclip, Download, X, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DashboardNavigation from '@/components/DashboardNavigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useOpportunities } from '@/lib/hooks/useOpportunities';
 import { useContractors } from '@/lib/hooks/useContractors';
+import { createClient } from '@/lib/supabase/client';
 
 interface Bid {
   id: string;
@@ -48,9 +49,10 @@ interface Contractor {
 
 export default function ProcurementDashboard() {
   const router = useRouter();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<'opportunities' | 'post' | 'profile' | 'contractors' | 'messages'>('opportunities');
   const [showPostForm, setShowPostForm] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   
   // User display name
   const userName = profile?.company_name || profile?.full_name || user?.email?.split('@')[0] || 'Procurement Officer';
@@ -201,10 +203,47 @@ export default function ProcurementDashboard() {
     }
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 3000);
+    if (!user) return;
+
+    const supabase = createClient();
+    const formData = new FormData(e.currentTarget);
+    
+    try {
+      // Update profiles table with form data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: formData.get('fullName') as string,
+          company_name: formData.get('agency') as string,
+          phone: formData.get('phone') as string,
+          location: formData.get('location') as string,
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Refresh profile in auth context
+      await refreshProfile();
+      
+      setProfileSaved(true);
+      setProfileError(null);
+      setTimeout(() => setProfileSaved(false), 3000);
+      
+      // TODO: Remove localStorage fallback once API is confirmed working
+      localStorage.setItem('fedmatch-procurement-profile-draft', JSON.stringify({
+        fullName: formData.get('fullName'),
+        email: formData.get('email'),
+        agency: formData.get('agency'),
+        phone: formData.get('phone'),
+        location: formData.get('location'),
+      }));
+    } catch (error) {
+      console.error('Profile save error:', error);
+      setProfileError('Failed to save profile. Please try again.');
+      setTimeout(() => setProfileError(null), 5000);
+    }
   };
 
   const handleTabChange = (tab: string) => {
@@ -489,32 +528,38 @@ export default function ProcurementDashboard() {
                 Profile saved successfully!
               </div>
             )}
+            {profileError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+                <AlertCircle size={20} />
+                {profileError}
+              </div>
+            )}
             <form className="space-y-6" onSubmit={handleSaveProfile}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
-                  <input type="text" defaultValue={userName} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                  <input type="text" name="fullName" defaultValue={profile?.full_name || ''} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
-                  <input type="email" placeholder="Enter your email" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                  <input type="email" name="email" defaultValue={user?.email || ''} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Agency/Organization</label>
-                  <input type="text" placeholder="Enter your agency" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
+                  <input type="text" name="agency" defaultValue={profile?.company_name || ''} placeholder="Enter your agency" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Phone</label>
-                  <input type="tel" placeholder="Enter your phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <input type="tel" name="phone" defaultValue={profile?.phone || ''} placeholder="Enter your phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Office Location</label>
-                <input type="text" placeholder="Enter your location" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                <input type="text" name="location" defaultValue={profile?.location || ''} placeholder="Enter your location" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
               </div>
 
               <button type="submit" className="btn btn-primary btn-lg btn-full">
